@@ -26,6 +26,10 @@ public class GameState {
 		this.eventQueue = eventQueue;
 	}
 
+	public GameState (GameState newState) {
+		replace (newState);
+	}
+
 	/**
 	 * Runs an event. TODO: Write these classes and have them use subclasses of Event
 	 * @param event the event to execute
