@@ -9,18 +9,29 @@ public class Event implements Serializable, Comparable<Event> {
 
 	private static long serialVersionUID = 1L;
 
+	private long id;
 	private long timestamp;
 	private int actor_id;
 
 	/**
 	 * Creates an Event object
 	 *
+	 * @param id
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	public Event (long timestamp, int actor_id) {
+	public Event (long id, long timestamp, int actor_id) {
+		this.id = id;
 		this.timestamp = timestamp;
 		this.actor_id = actor_id;
+	}
+
+	public long getId () {
+		return id;
+	}
+
+	public void setId (long id) {
+		this.id = id;
 	}
 
 	public long getTimestamp () {
