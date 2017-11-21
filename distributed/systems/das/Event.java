@@ -57,7 +57,8 @@ public class Event implements Serializable, Comparable<Event> {
 	 * or a positive integer as this event is before, equal to, or later than the specified
 	 * event.
 	 *
-	 * This first compares the timestamp, and then the ids of the two actors.
+	 * This first compares the timestamp, and then the ids of the two actors. Thus, an actor
+	  * cannot have two actions at the same timestamp
 	 *
 	 * @param event The event to compare
 	 */
