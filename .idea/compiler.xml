@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/distributed/systems/das/BattleField.java" />
+      <directory url="file://$PROJECT_DIR$/distributed/systems/das/units" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/distributed/systems/das/presentation" includeSubdirectories="true" />
+    </excludeFromCompile>
+  </component>
+</project>
