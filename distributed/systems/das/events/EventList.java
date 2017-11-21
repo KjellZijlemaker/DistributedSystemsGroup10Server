@@ -2,14 +2,14 @@ package distributed.systems.das.events;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Queue for all events
  */
-public class EventQueue implements Iterable<Event>, Serializable {
+public class EventList implements Iterable<Event>, Serializable {
 
-	private PriorityBlockingQueue<Event> events = new PriorityBlockingQueue<Event> (11);
+	private CopyOnWriteArrayList<Event> events = new CopyOnWriteArrayList<> ();
 
 	public synchronized boolean add (Event event) {
 		return this.events.add (event);
@@ -19,11 +19,11 @@ public class EventQueue implements Iterable<Event>, Serializable {
 		this.events.clear ();
 	}
 
-	public synchronized boolean addAll (EventQueue queue) {
+	public synchronized boolean addAll (EventList queue) {
 		return this.events.addAll (queue.getEvents ());
 	}
 
-	public synchronized PriorityBlockingQueue<Event> getEvents () {
+	public synchronized CopyOnWriteArrayList<Event> getEvents () {
 		return this.events;
 	}
 

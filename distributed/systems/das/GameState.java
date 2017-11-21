@@ -1,7 +1,7 @@
 package distributed.systems.das;
 
 import distributed.systems.das.events.Event;
-import distributed.systems.das.events.EventQueue;
+import distributed.systems.das.events.EventList;
 
 /**
  * Class containing the global gamestate. This
@@ -19,11 +19,11 @@ public class GameState {
 	private static int playerCount = 0;
 
 	private long time = 0;
-	private EventQueue eventQueue;
+	private EventList eventList;
 
-	public GameState (long time, EventQueue eventQueue) {
+	public GameState (long time, EventList eventList) {
 		this.time = time;
-		this.eventQueue = eventQueue;
+		this.eventList = eventList;
 	}
 
 	public GameState (GameState newState) {
@@ -51,8 +51,8 @@ public class GameState {
 //		TODO: copy over the actual game state, including all the logic, etc.
 //		This is assuming that this class is the one that will preside over the all the game
 //		variables.
-		this.eventQueue.clear ();
-		return this.eventQueue.addAll (newState.getEventQueue ());
+		this.eventList.clear ();
+		return this.eventList.addAll (newState.getEventList ());
 
 	}
 
@@ -64,8 +64,8 @@ public class GameState {
 		this.time = time;
 	}
 
-	public synchronized EventQueue getEventQueue () {
-		return this.eventQueue;
+	public synchronized EventList getEventList () {
+		return this.eventList;
 	}
 
 	/**
