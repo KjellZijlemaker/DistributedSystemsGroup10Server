@@ -1,4 +1,4 @@
-package distributed.systems.das;
+package distributed.systems.das.events;
 
 import java.util.Iterator;
 import java.util.concurrent.PriorityBlockingQueue;
