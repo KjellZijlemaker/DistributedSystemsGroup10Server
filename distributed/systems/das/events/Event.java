@@ -2,25 +2,25 @@ package distributed.systems.das.events;
 
 import java.io.Serializable;
 
+/**
+ * Super class for events
+ */
 public class Event implements Serializable, Comparable<Event> {
 
 	private static long serialVersionUID = 1L;
 
 	private long timestamp;
 	private int actor_id;
-	private int command; // TODO not suitable for final game code
 
 	/**
 	 * Creates an Event object
 	 *
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
-	 * @param command   The numerical value of the command that was issued
 	 */
-	public Event (long timestamp, int actor_id, int command) {
+	public Event (long timestamp, int actor_id) {
 		this.timestamp = timestamp;
 		this.actor_id = actor_id;
-		this.command = command;
 	}
 
 	public long getTimestamp () {
@@ -39,17 +39,9 @@ public class Event implements Serializable, Comparable<Event> {
 		this.actor_id = actor_id;
 	}
 
-	public int getCommand () {
-		return command;
-	}
-
-	public void setCommand (int command) {
-		this.command = command;
-	}
-
 	@Override
 	public String toString () {
-		return "Event(" + this.timestamp + ", " + this.actor_id + ", " + this.command + ")";
+		return "Event(" + this.timestamp + ", " + this.actor_id + ")";
 	}
 
 	 /**
