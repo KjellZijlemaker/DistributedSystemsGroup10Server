@@ -1,12 +1,13 @@
 package distributed.systems.das.events;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Queue for all events
  */
-public class EventQueue implements Iterable<Event> {
+public class EventQueue implements Iterable<Event>, Serializable {
 
 	private PriorityBlockingQueue<Event> events = new PriorityBlockingQueue<Event> (11);
 
@@ -29,6 +30,11 @@ public class EventQueue implements Iterable<Event> {
 	@Override
 	public Iterator<Event> iterator () {
 		return this.events.iterator ();
+	}
+
+	@Override
+	public String toString () {
+		return this.events.toString ();
 	}
 
 }
