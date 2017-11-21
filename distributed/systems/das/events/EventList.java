@@ -23,8 +23,8 @@ public class EventList implements Iterable<Event>, Serializable {
 		this.events.clear ();
 	}
 
-	public synchronized boolean addAll (EventList queue) {
-		return this.events.addAll (queue.getEvents ());
+	public synchronized boolean addAll (EventList events) {
+		return this.events.addAll (events.getEvents ());
 	}
 
 	public synchronized CopyOnWriteArrayList<Event> getEvents () {
