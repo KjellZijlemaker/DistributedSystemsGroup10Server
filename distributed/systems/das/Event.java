@@ -49,7 +49,7 @@ public class Event implements Serializable, Comparable<Event> {
 
 	@Override
 	public String toString () {
-		return "Event(" + timestamp + ", " + actor_id + ", " + command + ")";
+		return "Event(" + this.timestamp + ", " + this.actor_id + ", " + this.command + ")";
 	}
 
 	 /**
@@ -64,9 +64,9 @@ public class Event implements Serializable, Comparable<Event> {
 	 */
 	@Override
 	public int compareTo (Event event) {
-		int comparison = Long.compare (timestamp, event.getTimestamp ());
+		int comparison = Long.compare (this.timestamp, event.getTimestamp ());
 		if (comparison == 0) {
-			comparison = Integer.compare (actor_id, actor_id);
+			comparison = Integer.compare (this.actor_id, this.actor_id);
 		}
 		return comparison;
 	}
