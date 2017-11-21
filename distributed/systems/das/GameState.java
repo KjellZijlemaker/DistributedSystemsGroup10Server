@@ -60,6 +60,10 @@ public class GameState {
 		return this.time;
 	}
 
+	public synchronized void setTime (long time) {
+		this.time = time;
+	}
+
 	public synchronized EventQueue getEventQueue () {
 		return this.eventQueue;
 	}
