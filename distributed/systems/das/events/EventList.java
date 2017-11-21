@@ -15,6 +15,10 @@ public class EventList implements Iterable<Event>, Serializable {
 		return this.events.add (event);
 	}
 
+	public synchronized void add (int index, Event event) {
+		this.events.add (index, event);
+	}
+
 	public synchronized void clear () {
 		this.events.clear ();
 	}
