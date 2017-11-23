@@ -7,15 +7,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 public class Core {
     private static final String POISON_PILL = "POISON_PILL";
 
     public static void main(String[] args) throws Exception {
+
         Selector selector = Selector.open();
         ServerSocketChannel serverSocket = ServerSocketChannel.open();
         serverSocket.bind(new InetSocketAddress("localhost", 5454));
@@ -24,6 +23,7 @@ public class Core {
         ByteBuffer buffer = ByteBuffer.allocate(128);
 
         while (true) {
+
             selector.select();
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> iter = selectedKeys.iterator();
@@ -53,20 +53,26 @@ public class Core {
             return;
         }
 
+        // Get object over network and deserialize
         ByteArrayInputStream bIs = new ByteArrayInputStream(buffer.array());
         ObjectInputStream is = new ObjectInputStream(bIs);
-        Map<String, String> map = (HashMap) is.readObject();
+        Kuku kuku = (Kuku) is.readObject();
+        System.out.println("UUID: " + kuku.getA() + " connected");
 
-//        buffer.flip();
-        StringBuilder response = new StringBuilder();
-        for (String mapKey : map.keySet()) {
-            System.out.println(mapKey + ": " + map.get(mapKey));
-            response.append(mapKey).append(": ").append(map.get(mapKey));
-        }
-        client.write(ByteBuffer.wrap(response.toString().getBytes()));
-//        client.write(buffer);
+        kuku.setA("OK"); // Set new value for A
+
+        // Send it back to the client
+        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(byteOutputStream);
+        out.writeObject(kuku);
+        out.flush();
+        out.close();
+
+        client.write(ByteBuffer.wrap(byteOutputStream.toByteArray()));
         buffer.clear();
     }
+
+
 
     private static void register(Selector selector, ServerSocketChannel serverSocket) throws IOException {
         SocketChannel client = serverSocket.accept();
@@ -84,4 +90,10 @@ public class Core {
 
         return builder.start();
     }
+
+
+    public void runServer() throws IOException, ClassNotFoundException{
+
+    }
+
 }
