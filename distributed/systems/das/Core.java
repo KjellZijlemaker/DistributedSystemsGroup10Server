@@ -1,26 +1,27 @@
 package distributed.systems.das;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class Core {
     private static final String POISON_PILL = "POISON_PILL";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         Selector selector = Selector.open();
         ServerSocketChannel serverSocket = ServerSocketChannel.open();
         serverSocket.bind(new InetSocketAddress("localhost", 5454));
         serverSocket.configureBlocking(false);
         serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-        ByteBuffer buffer = ByteBuffer.allocate(256);
+        ByteBuffer buffer = ByteBuffer.allocate(128);
 
         while (true) {
             selector.select();
@@ -42,16 +43,28 @@ public class Core {
         }
     }
 
-    private static void answerWithEcho(ByteBuffer buffer, SelectionKey key) throws IOException {
+    private static void answerWithEcho(ByteBuffer buffer, SelectionKey key) throws Exception {
         SocketChannel client = (SocketChannel) key.channel();
-        client.read(buffer);
-        if (new String(buffer.array()).trim().equals(POISON_PILL)) {
+        int bytesRead = client.read(buffer);
+
+        if (bytesRead == -1) {
+            key.cancel();
             client.close();
-            System.out.println("Not accepting client messages anymore");
+            return;
         }
 
-        buffer.flip();
-        client.write(buffer);
+        ByteArrayInputStream bIs = new ByteArrayInputStream(buffer.array());
+        ObjectInputStream is = new ObjectInputStream(bIs);
+        Map<String, String> map = (HashMap) is.readObject();
+
+//        buffer.flip();
+        StringBuilder response = new StringBuilder();
+        for (String mapKey : map.keySet()) {
+            System.out.println(mapKey + ": " + map.get(mapKey));
+            response.append(mapKey).append(": ").append(map.get(mapKey));
+        }
+        client.write(ByteBuffer.wrap(response.toString().getBytes()));
+//        client.write(buffer);
         buffer.clear();
     }
 
