@@ -1,4 +1,4 @@
-package distributed.systems.das;
+import Services.UserStore;
 
 import java.io.*;
 import java.nio.channels.SelectionKey;
@@ -9,7 +9,10 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-
+/**
+ * A server can run several services. Each can have a different Service class and each class will have a different
+ * interface to implement. When working on the code, please do this for readability of the code
+ */
 public class Core extends UnicastRemoteObject  {
 	public Core() throws RemoteException {
 		super();

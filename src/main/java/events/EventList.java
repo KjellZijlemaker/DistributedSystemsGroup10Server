@@ -1,4 +1,4 @@
-package distributed.systems.das.events;
+package events;
 
 import java.io.Serializable;
 import java.util.Iterator;

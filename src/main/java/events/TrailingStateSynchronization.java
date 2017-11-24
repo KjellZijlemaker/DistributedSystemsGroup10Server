@@ -1,6 +1,5 @@
-package distributed.systems.das.events;
+package events;
 
-import distributed.systems.das.GameState;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
