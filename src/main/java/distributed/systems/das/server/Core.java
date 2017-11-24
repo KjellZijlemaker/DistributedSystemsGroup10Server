@@ -1,62 +1,31 @@
 package distributed.systems.das.server;
 
-import distributed.systems.das.server.Interfaces.RMIUserInterface;
-import distributed.systems.das.server.Services.UserStore;
+import distributed.systems.das.server.Interfaces.RMIGameStateInfo;
+import distributed.systems.das.server.Interfaces.RMIGameStateUpdate;
+import distributed.systems.das.server.Services.UpdateGameState;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A server can run several services. Each can have a different Service class and each class will have a different
- * interface to implement. When working on the code, please do this for readability of the code
- */
 public class Core {
 
-    public static void main(String args[]) {
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new SecurityManager());
-        }
+    public static void main(String args[]) throws Exception {
+        List<RMIGameStateUpdate> clients = new ArrayList<>();
 
-        try {
-            RMIUserInterface engine = new UserStore();
-            RMIUserInterface stub = (RMIUserInterface) UnicastRemoteObject.exportObject(engine, 0);
+        LocateRegistry.createRegistry(5001);
+        UpdateGameState sii = new UpdateGameState(clients);
+        Naming.rebind("//:5001/gameserver", (RMIGameStateInfo) sii);
+        System.out.println("gameserver registered and ready");
+        Thread updateThread = new Thread(sii, "gameserver");
+        updateThread.start();
 
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("//localhost/userRegistry", stub);
-            System.out.println("ComputeEngine bound");
-
-        } catch (Exception e) {
-            System.err.println("Server exception: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-    }
-
-
-    private static void register(Selector selector, ServerSocketChannel serverSocket) throws IOException {
-        SocketChannel client = serverSocket.accept();
-        client.configureBlocking(false);
-        client.register(selector, SelectionKey.OP_READ);
-    }
-
-    public static Process start() throws IOException, InterruptedException {
-        String javaHome = System.getProperty("java.home");
-        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String classpath = System.getProperty("java.class.path");
-        String className = Core.class.getCanonicalName();
-
-        ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", classpath, className);
-
-        return builder.start();
+        UpdateGameState sii1 = new UpdateGameState(clients);
+        Naming.rebind("//:5001/ServerUpdateReceiver1", sii);
+        System.out.println("ServerUpdateReceiver1 registered and ready");
+        Thread updateThread1 = new Thread(sii, "ServerUpdateReceiver1");
+        updateThread1.start();
     }
 
 }

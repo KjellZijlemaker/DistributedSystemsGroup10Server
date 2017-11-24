@@ -99,4 +99,12 @@ public class GameState {
 	public static int getPlayerCount() {
 		return playerCount;
 	}
+
+	/**
+	 * Increment the playercount
+	 * @return
+	 */
+ 	public static synchronized void setPlayerCount(int count){
+		playerCount = count;
+	}
 }

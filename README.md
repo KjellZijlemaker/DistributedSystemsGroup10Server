@@ -1,4 +1,8 @@
-# DistributedSystemsGroup10
+# Distributed Systems [Group10]
 
-To run code go into the Target/Classes folder in your terminal and start rmiregistry
-After, you can run the code in the IDE, or compile it via the terminal and run it from there
+## Build and run
+To create executable jar file run this command from project root
+```
+$ mvn clean compile assembly:single
+$ java -jar target/server-jar-with-dependencies.jar
+```
