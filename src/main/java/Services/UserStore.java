@@ -2,6 +2,7 @@ package Services;
 
 import Beans.User;
 import Interfaces.RMIUserInterface;
+import events.GameState;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

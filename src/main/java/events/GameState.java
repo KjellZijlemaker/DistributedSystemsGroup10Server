@@ -1,5 +1,7 @@
 package events;
 
+import java.io.Serializable;
+
 /**
  * Class containing the global gamestate. This
  * state contains small things, which all threads 
@@ -99,4 +101,13 @@ public class GameState {
 	public static int getPlayerCount() {
 		return playerCount;
 	}
+
+	/**
+	 * Increment the playercount
+	 * @return
+	 */
+	public static synchronized void setPlayerCount(int count){
+		playerCount = count;
+	}
+
 }

@@ -10,4 +10,5 @@ import java.rmi.RemoteException;
  */
 public interface RMIUserInterface extends Remote {
     public String connectUser(User user) throws RemoteException;
+
 }
