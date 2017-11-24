@@ -3,13 +3,11 @@ package distributed.systems.das;
 import distributed.systems.das.events.Event;
 import distributed.systems.das.events.EventList;
 
-import java.util.FormatFlagsConversionMismatchException;
-
 /**
  * Class containing the global gamestate. This
- * state contains small things, which all threads 
- * need to know. 
- * 
+ * state contains small things, which all threads
+ * need to know.
+ *
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class GameState {
@@ -36,6 +34,7 @@ public class GameState {
 
 	/**
 	 * Runs an event. TODO: Write these classes and have them use subclasses of Event
+	 *
 	 * @param event the event to execute
 	 * @return true if successful
 	 */
@@ -61,10 +60,17 @@ public class GameState {
 
 	/**
 	 * Executes all the events that have happened since the time value for this object
-	 * @return
+	 *
+	 * @return true if successful
 	 */
 	public synchronized boolean synchronize () {
 		// TODO: Handle all the events that have happened since current time
+
+		for (Event event : this.eventList.getEventsByTime (this.lastUpdate, this.time)) {
+			execute (event);
+		}
+
+		this.lastUpdate = this.time;
 		return true;
 	}
 
@@ -84,24 +90,26 @@ public class GameState {
 	 * Stop the program from running. Inform all threads
 	 * to close down.
 	 */
-	public static void haltProgram() {
+	public static void haltProgram () {
 		running = false;
 	}
 
 	/**
-	 * Get the current running state 
-	 * @return true if the program is supposed to 
+	 * Get the current running state
+	 *
+	 * @return true if the program is supposed to
 	 * keep running.
 	 */
-	public static boolean getRunningState() {
+	public static boolean getRunningState () {
 		return running;
 	}
 
 	/**
 	 * Get the number of players currently in the game.
+	 *
 	 * @return int: the number of players currently in the game.
 	 */
-	public static int getPlayerCount() {
+	public static int getPlayerCount () {
 		return playerCount;
 	}
 }
