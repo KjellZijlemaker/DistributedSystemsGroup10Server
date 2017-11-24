@@ -27,8 +27,27 @@ public class EventList implements Iterable<Event>, Serializable {
 		return this.events.addAll (events.getEvents ());
 	}
 
+	/**
+	 * Returns all events
+	 */
 	public synchronized CopyOnWriteArrayList<Event> getEvents () {
 		return this.events;
+	}
+
+	/**
+	 * Returns all events in a range of time
+	 * @param from oldest
+	 * @param to most recent
+	 */
+	public synchronized CopyOnWriteArrayList<Event> getEventsByTime (long from, long to) {
+		CopyOnWriteArrayList<Event> newList = new CopyOnWriteArrayList<>();
+	    for (Event event : events) {
+	    	long timestamp = event.getTimestamp();
+	    	if (timestamp >= from && timestamp < to) {
+	    		newList.add(event);
+			}
+		}
+		return newList;
 	}
 
 	@Override
