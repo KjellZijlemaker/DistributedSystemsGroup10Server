@@ -1,7 +1,7 @@
-package Services;
+package distributed.systems.das.server.Services;
 
-import Beans.User;
-import Interfaces.RMIUserInterface;
+import distributed.systems.das.server.Beans.User;
+import distributed.systems.das.server.Interfaces.RMIUserInterface;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -13,7 +13,7 @@ import java.util.UUID;
  * The service will handle the logic which the server must execute. Note that the objects of the interface must be
  * implemented
  */
-public class UserStore extends UnicastRemoteObject implements RMIUserInterface {
+public class UserStore implements RMIUserInterface {
     private static final long serialVersionUID = 1L;
     private static final String serverID = UUID.randomUUID().toString();
     private List<User> userList;
@@ -34,10 +34,10 @@ public class UserStore extends UnicastRemoteObject implements RMIUserInterface {
 
     @Override
     public String connectUser(User user) throws RemoteException {
-        if(user.getUserID() != ""){
+        if (user.getUserID() != "") {
             System.out.println("Player: " + user.getUserID() + " connected");
         }
-        if(this.userList.add(user)){
+        if (this.userList.add(user)) {
             return this.serverID;
         }
 

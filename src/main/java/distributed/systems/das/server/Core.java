@@ -1,45 +1,45 @@
-import Services.UserStore;
+package distributed.systems.das.server;
 
-import java.io.*;
+import distributed.systems.das.server.Interfaces.RMIUserInterface;
+import distributed.systems.das.server.Services.UserStore;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
  * A server can run several services. Each can have a different Service class and each class will have a different
  * interface to implement. When working on the code, please do this for readability of the code
  */
-public class Core extends UnicastRemoteObject  {
-	public Core() throws RemoteException {
-		super();
-	}
-    private static final String POISON_PILL = "POISON_PILL";
+public class Core {
 
-	public static void main(String args[]) {
+    public static void main(String args[]) {
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
 
-		try {
-			Naming.rebind("//localhost/userRegistry", new UserStore());
-			System.err.println("user registry ready");
+        try {
+            RMIUserInterface engine = new UserStore();
+            RMIUserInterface stub = (RMIUserInterface) UnicastRemoteObject.exportObject(engine, 0);
 
-		} catch (Exception e) {
-			System.err.println("Server exception: " + e.getMessage());
-		}
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind("//localhost/userRegistry", stub);
+            System.out.println("ComputeEngine bound");
 
-		try {
-			Naming.rebind("//localhost/runGame", new UserStore());
-			System.err.println("game logic ready");
+        } catch (Exception e) {
+            System.err.println("Server exception: " + e.getMessage());
+            e.printStackTrace();
+        }
 
-		} catch (Exception e) {
-			System.err.println("Server exception: " + e.getMessage());
-		}
-
-	}
-
-
+    }
 
 
     private static void register(Selector selector, ServerSocketChannel serverSocket) throws IOException {

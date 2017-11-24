@@ -1,3 +1,5 @@
+package distributed.systems.das.server;
+
 /**
  * Different request types for the
  * nodes to send to the server.

@@ -1,6 +1,7 @@
-package Interfaces;
+package distributed.systems.das.server.Interfaces;
 
-import Beans.User;
+
+import distributed.systems.das.server.Beans.User;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

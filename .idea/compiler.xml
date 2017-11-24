@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <excludeFromCompile>
-      <file url="file://$PROJECT_DIR$/src/main/java/BattleField.java" />
-      <directory url="file://$PROJECT_DIR$/src/main/java/units" includeSubdirectories="true" />
+      <file url="file://$PROJECT_DIR$/src/main/java/distributed/systems/das/server/BattleField.java" />
+      <directory url="file://$PROJECT_DIR$/src/main/java/distributed/systems/das/server/units" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/src/main/java/presentation" includeSubdirectories="true" />
     </excludeFromCompile>
     <annotationProcessing>

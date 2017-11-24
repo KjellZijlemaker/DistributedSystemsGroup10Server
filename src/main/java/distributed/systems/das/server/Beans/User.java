@@ -1,4 +1,4 @@
-package Beans;
+package distributed.systems.das.server.Beans;
 
 import java.io.Serializable;
 
