@@ -1,0 +1,12 @@
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/events/GameState.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/events/Event.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Interfaces/RMIGameStateUpdate.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Services/UserStore.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/events/TrailingStateSynchronization.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/MessageRequest.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/events/EventList.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Services/UpdateGameState.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Core.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Beans/User.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Interfaces/RMIGameStateInfo.java
+/Users/gkiko/Workspace/vu/distributed/400130-DAS/src/main/java/distributed/systems/das/server/Interfaces/RMIUserInterface.java
