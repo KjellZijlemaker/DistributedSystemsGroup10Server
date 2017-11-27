@@ -66,7 +66,7 @@ public class Notify implements Runnable {
 
 	public static class AlreadyRunningException extends Exception {
 
-		public AlreadyRunningException () {
+		AlreadyRunningException () {
 			super ("Notify is already running!");
 		}
 	}
