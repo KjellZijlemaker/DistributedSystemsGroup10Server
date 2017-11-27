@@ -60,8 +60,12 @@ public class TrailingStateSynchronization implements Notify.Listener {
 		}
 	}
 
-	public synchronized void executeEvent (Event event) {
+	/**
+	 * Executes top element of the pending list of events
+	 */
+	public synchronized void executeEvent () {
 		int i = 1;
+		Event event = pendingEvents.pop ();
 		GameState previousState = getState (0);
 
 		// Execute the command in the leading game state
