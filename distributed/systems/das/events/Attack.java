@@ -1,6 +1,6 @@
 package distributed.systems.das.events;
 
-public class DealDamage extends Event {
+public class Attack extends Event {
 
 	private int targetX, targetY;
 
@@ -11,8 +11,8 @@ public class DealDamage extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	public DealDamage (long id, long timestamp, int actor_id,
-					   int targetX, int targetY) {
+	public Attack (long id, long timestamp, int actor_id,
+				   int targetX, int targetY) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
@@ -39,14 +39,14 @@ public class DealDamage extends Event {
 		this.targetY = targetY;
 	}
 
-	public static class DealDamageBuilder {
+	public static class AttackBuilder {
 
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
 		private int actor_id;
 
-		public DealDamageBuilder (long id) {
+		public AttackBuilder (long id) {
 			this.id = id;
 		}
 
@@ -90,8 +90,8 @@ public class DealDamage extends Event {
 			this.actor_id = actor_id;
 		}
 
-		public DealDamage createEvent () {
-			return new DealDamage (id, timestamp, actor_id, targetX, targetY);
+		public Attack createEvent () {
+			return new Attack (id, timestamp, actor_id, targetX, targetY);
 		}
 	}
 
