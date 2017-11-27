@@ -43,6 +43,7 @@ public class Notify implements Runnable {
 				Thread.sleep (minInterval);
 			} catch (InterruptedException e) {
 				Log.throwException (e, this.getClass ());
+				// TODO: recover from this?
 			}
 			updateTime ();
 		}
