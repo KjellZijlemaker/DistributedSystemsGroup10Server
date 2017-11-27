@@ -49,6 +49,15 @@ public class EventList implements Iterable<Event>, Serializable {
 		}
 		return newList;
 	}
+	
+	/**
+	 * Returns the top element and returns it.
+	 */
+	public synchronized Event pop () {
+		Event event = events.get (0);
+		events.remove (0);
+		return event;
+	}
 
 	@Override
 	public Iterator<Event> iterator () {
