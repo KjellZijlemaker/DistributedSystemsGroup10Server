@@ -52,7 +52,7 @@ public class Event implements Serializable, Comparable<Event> {
 
 	@Override
 	public String toString () {
-		return "Event(" + this.timestamp + ", " + this.actor_id + ")";
+		return "Event(" + this.timestamp + ", " + this.actor_id + ":" + this.actor_id + ")";
 	}
 
 	 /**
