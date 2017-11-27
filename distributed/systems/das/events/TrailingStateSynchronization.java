@@ -19,12 +19,17 @@ public class TrailingStateSynchronization implements Notify.Listener {
 
 	/**
 	 * @param startingState
-	 * @param delayInterval
+	 * @param delayInterval interval between the states. Must be divible by <code>tickrate</code>
 	 * @param delays        number of delays
-	 * @param tickrate        rate at which time is updated
+	 * @param tickrate      rate at which time is updated
 	 */
 	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays,
 										 int tickrate) {
+
+		if (delayInterval % tickrate != 0) {
+			throw new IllegalArgumentException ("delayInterval MUST be divisble by tickrate!");
+		}
+
 		long time = startingState.getTime ();
 		this.notify = new Notify (tickrate);
 		try {
