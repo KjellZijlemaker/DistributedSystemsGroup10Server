@@ -2,6 +2,7 @@ package distributed.systems.das.server.Interfaces;
 
 
 import distributed.systems.das.server.Beans.User;
+import distributed.systems.das.server.events.Event;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -11,4 +12,5 @@ import java.rmi.RemoteException;
  */
 public interface RMIUserInterface extends Remote {
     public String connectUser(User user) throws RemoteException;
+    public String registerWish(User user, Event event) throws RemoteException;
 }
