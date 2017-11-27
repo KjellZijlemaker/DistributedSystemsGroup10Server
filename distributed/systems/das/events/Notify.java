@@ -1,13 +1,15 @@
 package distributed.systems.das.events;
 
+import java.util.logging.Logger;
+
 public class Notify implements Runnable
 {
-	public class interface Listener
+	public interface Listener
 	{
 		public void update(long interval);
 	}
 
-	private long lastnotify;
+	private long lastNotify;
 	private Listener listener;
 	private boolean running = false;
 	private Thread thread = null;
@@ -37,13 +39,13 @@ public class Notify implements Runnable
 		if(!this.running && this.thread == null)
 		{
 			this.thread = new Thread(this);
-			this.lastnotify = System.currentTimeMillis();
+			this.lastNotify = System.currentTimeMillis ();
 			this.running = true;
 			thread.start();
 		}
 		else
 		{
-			throw new NotifyRunningException;
+			throw new NotifyRunningException ();
 		}
 	}
 
@@ -63,7 +65,7 @@ public class Notify implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-                Logger.getLogger(this.getClass().toString()).severe(e.getMessage());
+				Logger.getLogger (this.getClass ().toString ()).severe (e.getMessage ());
 			}
 			onFire();
 		}
@@ -71,8 +73,8 @@ public class Notify implements Runnable
 
 	private void onFire()
 	{
-		long t = this.lastfire;
-		this.lastfire = System.currentTimeMillis();
+		long t = this.lastNotify;
+		this.lastNotify = System.currentTimeMillis ();
 
 		Listener l = null;
 		synchronized (this)
@@ -82,7 +84,7 @@ public class Notify implements Runnable
 
 		if (l != null)
 		{
-			l.update((lastfire - t) / scale);
+			l.update ((lastNotify - t) / scale);
 		}
 	}
 
