@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TrailingStateSynchronization {
+public class TrailingStateSynchronization implements Notify.Listener {
 
 	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private List<Integer> delayIntervals = new ArrayList<> ();
@@ -80,7 +80,8 @@ public class TrailingStateSynchronization {
 		return true;
 	}
 
-	public synchronized void updateTime (long time) {
+	@Override
+	public void update (long time) {
 		for (int i = 0; i < states.size (); ++i) {
 			GameState state = states.get (i);
 			long delay = delayIntervals.get (i);

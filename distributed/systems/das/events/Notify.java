@@ -6,7 +6,7 @@ public class Notify implements Runnable
 {
 	public interface Listener
 	{
-		public void update(long interval);
+		public void update (long time);
 	}
 
 	private long lastNotify;
@@ -67,13 +67,12 @@ public class Notify implements Runnable
 			{
 				Logger.getLogger (this.getClass ().toString ()).severe (e.getMessage ());
 			}
-			onFire();
+			updateTime ();
 		}
 	}
 
-	private void onFire()
-	{
-		long t = this.lastNotify;
+	private void updateTime () {
+		long currentTime = this.lastNotify;
 		this.lastNotify = System.currentTimeMillis ();
 
 		Listener l = null;
@@ -84,7 +83,7 @@ public class Notify implements Runnable
 
 		if (l != null)
 		{
-			l.update ((lastNotify - t) / scale);
+			l.update (currentTime);
 		}
 	}
 
