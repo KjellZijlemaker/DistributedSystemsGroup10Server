@@ -288,7 +288,8 @@ public class BattleField implements IMessageReceivedHandler {
 			}
 			case moveUnit:
 				reply = new Message();
-				this.m),(Integer) msg.get ("y"));
+				this.moveUnit ((Unit) msg.get ("unit"), (Integer) msg.get ("x"),
+							   (Integer) msg.get ("y"));
 				/* Copy the id of the message so thaoveUnit((Unit)msg.get("unit"), (Integer)msg
 				.get("x"t the unit knows
 				 * what message the battlefield responded to. 
