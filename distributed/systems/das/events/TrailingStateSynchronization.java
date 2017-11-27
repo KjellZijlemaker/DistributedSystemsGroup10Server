@@ -1,6 +1,7 @@
 package distributed.systems.das.events;
 
 import distributed.systems.das.GameState;
+import distributed.systems.das.util.Log;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -14,14 +15,26 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private List<Integer> delayIntervals = new ArrayList<> ();
 	private EventList pendingEvents = new EventList ();
+	private Notify notify;
 
 	/**
 	 * @param startingState
 	 * @param delayInterval
 	 * @param delays        number of delays
+	 * @param tickrate        rate at which time is updated
 	 */
-	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays) {
+	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays,
+										 int tickrate) {
 		long time = startingState.getTime ();
+		this.notify = new Notify (tickrate);
+		try {
+			this.notify.start ();
+		} catch (Notify.AlreadyRunningException e) {
+			Log.throwException (e, this.getClass ());
+			// TODO: Handle this. Can probably just ignore, since it's already running.
+		}
+		this.notify.subscribe (this);
+
 		for (int i = 0; i < delays; ++i) { // create states
 			GameState state = new GameState (startingState);
 			state.updateTime (time - (i * delayInterval)); // create trails
@@ -45,7 +58,6 @@ public class TrailingStateSynchronization implements Notify.Listener {
 				pendingEvents.add (event);
 			}
 		}
-		// TODO: execute events from here?
 	}
 
 	public synchronized void executeEvent (Event event) {
