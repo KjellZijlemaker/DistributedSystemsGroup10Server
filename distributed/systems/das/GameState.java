@@ -78,8 +78,15 @@ public class GameState {
 		return this.time;
 	}
 
-	public synchronized void updateTime (long time) {
+	public synchronized void setTime (long time) {
 		this.time = time;
+	}
+
+	/**
+	 * Increments the time by specified amount
+	 */
+	public synchronized void updateTime (long time) {
+		this.time += time;
 	}
 
 	public synchronized EventList getEventList () {

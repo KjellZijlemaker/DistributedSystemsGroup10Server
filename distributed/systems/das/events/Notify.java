@@ -58,7 +58,7 @@ public class Notify implements Runnable {
 		this.lastNotify = System.currentTimeMillis ();
 
 		for (Listener listener : listeners) {
-			listener.update (currentTime);
+			listener.update (currentTime - lastNotify);
 		}
 	}
 
