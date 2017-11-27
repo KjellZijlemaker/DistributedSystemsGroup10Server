@@ -151,7 +151,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 				// Set the time to the actual time. synchronize() will then process all the
 				// events that now missing from the state because of overwriting the event list
 				// with the event list from the older state.
-				previousState.updateTime (time);
+				previousState.setTime (time);
 				previousState.synchronize ();
 			}
 
