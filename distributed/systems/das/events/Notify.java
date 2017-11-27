@@ -16,9 +16,8 @@ public class Notify implements Runnable {
 	}
 
 	public synchronized boolean subscribe (Listener listener) {
-		boolean clear = this.listener == null;
 		this.listener = listener;
-		return clear;
+		return (this.listener == null);
 	}
 
 	public synchronized void start () throws AlreadyRunningException {
