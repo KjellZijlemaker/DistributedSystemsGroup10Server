@@ -3,15 +3,13 @@ package distributed.systems.das.events;
 import distributed.systems.das.util.Log;
 
 public class Notify implements Runnable {
-	public interface Listener {
-		public void update (long time);
-	}
 
-	private long lastNotify;
-	private Listener listener;
-	private boolean running = false;
-	private Thread thread = null;
 	private final long minInterval;
+
+	private Listener listener;
+	private Thread thread = null;
+	private long lastNotify;
+	private boolean running = false;
 
 	public Notify (long minInterval) {
 		this.minInterval = minInterval;
@@ -69,5 +67,9 @@ public class Notify implements Runnable {
 		public AlreadyRunningException () {
 			super ("Notify is already running!");
 		}
+	}
+
+	public interface Listener {
+		public void update (long time);
 	}
 }
