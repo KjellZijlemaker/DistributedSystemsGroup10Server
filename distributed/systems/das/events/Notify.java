@@ -6,7 +6,7 @@ public class Notify implements Runnable {
 
 	private final long minInterval;
 
-	private Listener listener;
+	private volatile Listener listener;
 	private Thread thread = null;
 	private long lastNotify;
 	private boolean running = false;
@@ -15,9 +15,12 @@ public class Notify implements Runnable {
 		this.minInterval = minInterval;
 	}
 
-	public synchronized boolean subscribe (Listener listener) {
+	public synchronized void subscribe (Listener listener) {
 		this.listener = listener;
-		return (this.listener == null);
+	}
+
+	public synchronized void unsubscribe (Listener listener) {
+		this.listener = null;
 	}
 
 	public synchronized void start () throws AlreadyRunningException {
