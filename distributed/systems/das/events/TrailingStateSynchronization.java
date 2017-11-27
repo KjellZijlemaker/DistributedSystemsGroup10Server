@@ -14,7 +14,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 
 	/**
 	 * @param startingState
-	 * @param delayInterval interval between the states. Must be divisible by <code>tickrate</code>
+	 * @param delayInterval interval between the states. Must be divisible by {@code tickrate}
 	 * @param delays        number of delays
 	 * @param tickrate      rate at which time is updated
 	 */
