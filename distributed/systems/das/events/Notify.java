@@ -52,13 +52,12 @@ public class Notify implements Runnable {
 		long currentTime = this.lastNotify;
 		this.lastNotify = System.currentTimeMillis ();
 
-		Listener l = null;
-		synchronized (this) {
-			l = listener;
-		}
-
-		if (l != null) {
-			l.update (currentTime);
+		if (listener != null) {
+			synchronized (this) {
+				if (listener != null) {
+					listener.update (currentTime);
+				}
+			}
 		}
 	}
 
