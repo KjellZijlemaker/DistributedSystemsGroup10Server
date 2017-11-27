@@ -18,6 +18,11 @@ public class Heal extends Event {
 		this.targetY = targetY;
 	}
 
+	@Override
+	public int getType () {
+		return HEAL;
+	}
+
 	public int getTargetX () {
 		return targetX;
 	}

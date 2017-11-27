@@ -21,6 +21,11 @@ public class Move extends Event {
 		this.targetY = targetY;
 	}
 
+	@Override
+	public int getType () {
+		return MOVE;
+	}
+
 	public int getTargetX () {
 		return targetX;
 	}

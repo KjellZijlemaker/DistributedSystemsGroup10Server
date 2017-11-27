@@ -18,6 +18,11 @@ public class DealDamage extends Event {
 		this.targetY = targetY;
 	}
 
+	@Override
+	public int getType () {
+		return ATTACK;
+	}
+
 	public int getTargetX () {
 		return targetX;
 	}

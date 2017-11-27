@@ -21,11 +21,14 @@ public class GameState {
 	private long time;
 	private long lastUpdate;
 	private EventList eventList;
+	private BattleField battleField;
 
 	public GameState (long time, EventList eventList) {
 		this.time = time;
 		this.lastUpdate = time;
 		this.eventList = eventList;
+
+		battleField = BattleField.getBattleField ();
 	}
 
 	public GameState (GameState newState) {
@@ -39,7 +42,17 @@ public class GameState {
 	 * @return true if successful
 	 */
 	public synchronized boolean execute (Event event) {
-		// move, attack, etc.
+		switch (event.getType ()) {
+			case Event.ATTACK:
+				// TODO: Implement
+				break;
+			case Event.HEAL:
+				// TODO: Implement
+				break;
+			case Event.MOVE:
+				// TODO: Implement
+				break;
+		}
 		return true;
 	}
 

@@ -5,13 +5,22 @@ import java.io.Serializable;
 /**
  * Super class for events
  */
-public class Event implements Serializable, Comparable<Event> {
+public abstract class Event implements Serializable, Comparable<Event> {
 
 	private static long serialVersionUID = 1L;
+
+	public static final int ATTACK = 1;
+	public static final int HEAL = 2;
+	public static final int MOVE = 3;
 
 	private long id;
 	private long timestamp;
 	private int actor_id;
+
+	/**
+	 * Returns type of event
+	 */
+	public abstract int getType ();
 
 	/**
 	 * Creates an Event object
