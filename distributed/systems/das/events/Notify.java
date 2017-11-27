@@ -2,10 +2,8 @@ package distributed.systems.das.events;
 
 import distributed.systems.das.util.Log;
 
-public class Notify implements Runnable
-{
-	public interface Listener
-	{
+public class Notify implements Runnable {
+	public interface Listener {
 		public void update (long time);
 	}
 
@@ -15,48 +13,37 @@ public class Notify implements Runnable
 	private Thread thread = null;
 	private final long minInterval;
 
-	public Notify(long minInterval)
-	{
+	public Notify (long minInterval) {
 		this.minInterval = minInterval;
 	}
-	public synchronized boolean subscribe(Listener listener)
-	{
+
+	public synchronized boolean subscribe (Listener listener) {
 		boolean clear = this.listener == null;
 		this.listener = listener;
 		return clear;
 	}
 
-	public synchronized void start () throws AlreadyRunningException
-	{
-		if(!this.running && this.thread == null)
-		{
-			this.thread = new Thread(this);
+	public synchronized void start () throws AlreadyRunningException {
+		if (!this.running && this.thread == null) {
+			this.thread = new Thread (this);
 			this.lastNotify = System.currentTimeMillis ();
 			this.running = true;
-			thread.start();
-		}
-		else
-		{
+			thread.start ();
+		} else {
 			throw new AlreadyRunningException ();
 		}
 	}
 
-	public synchronized void stop()
-	{
+	public synchronized void stop () {
 		running = false;
 	}
 
 	@Override
-	public void run()
-	{
-		while (running)
-		{
-			try
-			{
+	public void run () {
+		while (running) {
+			try {
 				Thread.sleep (minInterval);
-			}
-			catch (InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 				Log.throwException (e, this.getClass ());
 			}
 			updateTime ();
@@ -68,13 +55,11 @@ public class Notify implements Runnable
 		this.lastNotify = System.currentTimeMillis ();
 
 		Listener l = null;
-		synchronized (this)
-		{
+		synchronized (this) {
 			l = listener;
 		}
 
-		if (l != null)
-		{
+		if (l != null) {
 			l.update (currentTime);
 		}
 	}
