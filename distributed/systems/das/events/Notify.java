@@ -2,11 +2,13 @@ package distributed.systems.das.events;
 
 import distributed.systems.das.util.Log;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public class Notify implements Runnable {
 
 	private final long minInterval;
+	private final CopyOnWriteArrayList<Listener> listeners = new CopyOnWriteArrayList<> ();
 
-	private volatile Listener listener;
 	private Thread thread = null;
 	private long lastNotify;
 	private boolean running = false;
@@ -15,12 +17,12 @@ public class Notify implements Runnable {
 		this.minInterval = minInterval;
 	}
 
-	public synchronized void subscribe (Listener listener) {
-		this.listener = listener;
+	public void subscribe (Listener listener) {
+		listeners.add (listener);
 	}
 
-	public synchronized void unsubscribe (Listener listener) {
-		this.listener = null;
+	public void unsubscribe (Listener listener) {
+		listeners.remove (listener);
 	}
 
 	public synchronized void start () throws AlreadyRunningException {
@@ -55,12 +57,8 @@ public class Notify implements Runnable {
 		long currentTime = this.lastNotify;
 		this.lastNotify = System.currentTimeMillis ();
 
-		if (listener != null) {
-			synchronized (this) {
-				if (listener != null) {
-					listener.update (currentTime);
-				}
-			}
+		for (Listener listener : listeners) {
+			listener.update (currentTime);
 		}
 	}
 
