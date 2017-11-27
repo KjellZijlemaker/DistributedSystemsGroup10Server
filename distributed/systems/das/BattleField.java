@@ -7,6 +7,7 @@ import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.das.events.Attack;
 import distributed.systems.das.events.Heal;
+import distributed.systems.das.events.Move;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
 import distributed.systems.das.units.Unit;
@@ -212,6 +213,13 @@ public class BattleField implements IMessageReceivedHandler {
 		}
 	}
 
+	public void move (Move move) {
+		int x = move.getTargetX ();
+		int y = move.getTargetY ();
+		Unit unit = this.getUnit (x, y);
+		this.moveUnit (unit, x, y);
+	}
+
 	public void onMessageReceived(Message msg) {
 		Message reply = null;
 		String origin = (String)msg.get("origin");
@@ -280,8 +288,9 @@ public class BattleField implements IMessageReceivedHandler {
 			}
 			case moveUnit:
 				reply = new Message();
-				this.moveUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
-				/* Copy the id of the message so that the unit knows 
+				this.m),(Integer) msg.get ("y"));
+				/* Copy the id of the message so thaoveUnit((Unit)msg.get("unit"), (Integer)msg
+				.get("x"t the unit knows
 				 * what message the battlefield responded to. 
 				 */
 				reply.put("id", msg.get("id"));
