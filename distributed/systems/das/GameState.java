@@ -3,6 +3,7 @@ package distributed.systems.das;
 import distributed.systems.das.events.Attack;
 import distributed.systems.das.events.Event;
 import distributed.systems.das.events.EventList;
+import distributed.systems.das.events.Heal;
 
 /**
  * Class containing the global gamestate. This
@@ -48,7 +49,7 @@ public class GameState {
 				battleField.attack ((Attack) event);
 				break;
 			case Event.HEAL:
-				// TODO: Implement
+				battleField.heal ((Heal) event);
 				break;
 			case Event.MOVE:
 				// TODO: Implement

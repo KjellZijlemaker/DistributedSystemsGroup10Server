@@ -6,6 +6,7 @@ import distributed.systems.core.Socket;
 import distributed.systems.core.SynchronizedSocket;
 import distributed.systems.core.exception.IDNotAssignedException;
 import distributed.systems.das.events.Attack;
+import distributed.systems.das.events.Heal;
 import distributed.systems.das.units.Dragon;
 import distributed.systems.das.units.Player;
 import distributed.systems.das.units.Unit;
@@ -198,7 +199,16 @@ public class BattleField implements IMessageReceivedHandler {
 		int y = attack.getTargetY ();
 		Unit unit = this.getUnit (x, y);
 		if (unit != null) {
-			unit.adjustHitPoints (attack.getDamage ());
+			unit.adjustHitPoints (-attack.getDamage ());
+		}
+	}
+
+	public void heal (Heal heal) {
+		int x = heal.getTargetX ();
+		int y = heal.getTargetY ();
+		Unit unit = this.getUnit (x, y);
+		if (unit != null) {
+			unit.adjustHitPoints (heal.getAmount ());
 		}
 	}
 
