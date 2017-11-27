@@ -51,7 +51,7 @@ public class EventList implements Iterable<Event>, Serializable {
 	}
 	
 	/**
-	 * Returns the top element and returns it.
+	 * Returns the top element and removes it.
 	 */
 	public synchronized Event pop () {
 		Event event = events.get (0);
