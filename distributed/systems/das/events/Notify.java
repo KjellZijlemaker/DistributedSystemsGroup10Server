@@ -6,15 +6,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Notify implements Runnable {
 
-	private final long minInterval;
+	private final long tickRate;
 	private final CopyOnWriteArrayList<Listener> listeners = new CopyOnWriteArrayList<> ();
 
 	private Thread thread = null;
 	private long lastNotify;
 	private boolean running = false;
 
-	public Notify (long minInterval) {
-		this.minInterval = minInterval;
+	public Notify (long tickRate) {
+		this.tickRate = tickRate;
 	}
 
 	public void subscribe (Listener listener) {
@@ -44,7 +44,7 @@ public class Notify implements Runnable {
 	public void run () {
 		while (running) {
 			try {
-				Thread.sleep (minInterval);
+				Thread.sleep (tickRate);
 			} catch (InterruptedException e) {
 				Log.throwException (e, this.getClass ());
 				// TODO: recover from this?
@@ -60,6 +60,10 @@ public class Notify implements Runnable {
 		for (Listener listener : listeners) {
 			listener.update (currentTime - lastNotify);
 		}
+	}
+
+	public long getTickRate () {
+		return this.tickRate;
 	}
 
 	public static class AlreadyRunningException extends Exception {
