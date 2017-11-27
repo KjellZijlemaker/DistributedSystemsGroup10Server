@@ -1,5 +1,6 @@
 package distributed.systems.das;
 
+import distributed.systems.das.events.Attack;
 import distributed.systems.das.events.Event;
 import distributed.systems.das.events.EventList;
 
@@ -44,7 +45,7 @@ public class GameState {
 	public synchronized boolean execute (Event event) {
 		switch (event.getType ()) {
 			case Event.ATTACK:
-				// TODO: Implement
+				battleField.attack ((Attack) event);
 				break;
 			case Event.HEAL:
 				// TODO: Implement
