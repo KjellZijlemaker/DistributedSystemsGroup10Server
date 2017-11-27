@@ -1,108 +1,79 @@
 package distributed.systems.das.events;
 
-import java.util.logging.Logger;
+import distributed.systems.das.util.Log;
 
-public class Notify implements Runnable
-{
-	public interface Listener
-	{
-		public void update(long interval);
-	}
+import java.util.concurrent.CopyOnWriteArrayList;
 
-	private long lastNotify;
-	private Listener listener;
-	private boolean running = false;
+public class Notify implements Runnable {
+
+	private final long tickRate;
+	private final CopyOnWriteArrayList<Listener> listeners = new CopyOnWriteArrayList<> ();
+
 	private Thread thread = null;
-	private final long minInterval;
-	private final long scale;
+	private long lastNotify;
+	private boolean running = false;
 
-	public Notify(long minInterval)
-	{
-		this(minInterval, 100);
+	public Notify (long tickRate) {
+		this.tickRate = tickRate;
 	}
 
-	public Notify(long minInterval, long scale)
-	{
-		this.minInterval = minInterval;
-		this.scale = scale;
+	public void subscribe (Listener listener) {
+		listeners.add (listener);
 	}
 
-	public synchronized boolean subscribe(Listener listener)
-	{
-		boolean clear = this.listener == null;
-		this.listener = listener;
-		return clear;
+	public void unsubscribe (Listener listener) {
+		listeners.remove (listener);
 	}
 
-	public synchronized void start() throws NotifyRunningException
-	{
-		if(!this.running && this.thread == null)
-		{
-			this.thread = new Thread(this);
+	public synchronized void start () throws AlreadyRunningException {
+		if (!this.running && this.thread == null) {
+			this.thread = new Thread (this);
 			this.lastNotify = System.currentTimeMillis ();
 			this.running = true;
-			thread.start();
-		}
-		else
-		{
-			throw new NotifyRunningException ();
+			thread.start ();
+		} else {
+			throw new AlreadyRunningException ();
 		}
 	}
 
-	public synchronized void stop()
-	{
+	public synchronized void stop () {
 		running = false;
 	}
 
 	@Override
-	public void run()
-	{
-		while (running)
-		{
-			try
-			{
-				Thread.sleep(minInterval * scale);
+	public void run () {
+		while (running) {
+			try {
+				Thread.sleep (tickRate);
+			} catch (InterruptedException e) {
+				Log.throwException (e, this.getClass ());
+				// TODO: recover from this?
 			}
-			catch (InterruptedException e)
-			{
-				Logger.getLogger (this.getClass ().toString ()).severe (e.getMessage ());
-			}
-			onFire();
+			updateTime ();
 		}
 	}
 
-	private void onFire()
-	{
-		long t = this.lastNotify;
+	private void updateTime () {
+		long currentTime = this.lastNotify;
 		this.lastNotify = System.currentTimeMillis ();
 
-		Listener l = null;
-		synchronized (this)
-		{
-			l = listener;
-		}
-
-		if (l != null)
-		{
-			l.update ((lastNotify - t) / scale);
+		for (Listener listener : listeners) {
+			listener.update (currentTime - lastNotify);
 		}
 	}
 
-	public static class NotifyRunningException extends Exception
-	{
-		public NotifyRunningException(String message, Throwable inner)
-		{
-			super(message, inner);
-		}
+	public long getTickRate () {
+		return this.tickRate;
+	}
 
-		public NotifyRunningException(String message)
-		{
-			super(message, null);
-		}
+	public static class AlreadyRunningException extends Exception {
 
-		public NotifyRunningException()
-		{
-			super("Active notification.");
+		AlreadyRunningException () {
+			super ("Notify is already running!");
 		}
+	}
+
+	public interface Listener {
+		public void update (long time);
 	}
 }
