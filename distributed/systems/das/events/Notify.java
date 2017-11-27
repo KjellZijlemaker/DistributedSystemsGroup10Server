@@ -1,6 +1,6 @@
 package distributed.systems.das.events;
 
-import java.util.logging.Logger;
+import distributed.systems.das.util.Log;
 
 public class Notify implements Runnable
 {
@@ -14,19 +14,11 @@ public class Notify implements Runnable
 	private boolean running = false;
 	private Thread thread = null;
 	private final long minInterval;
-	private final long scale;
 
 	public Notify(long minInterval)
 	{
-		this(minInterval, 100);
-	}
-
-	public Notify(long minInterval, long scale)
-	{
 		this.minInterval = minInterval;
-		this.scale = scale;
 	}
-
 	public synchronized boolean subscribe(Listener listener)
 	{
 		boolean clear = this.listener == null;
@@ -34,7 +26,7 @@ public class Notify implements Runnable
 		return clear;
 	}
 
-	public synchronized void start() throws NotifyRunningException
+	public synchronized void start () throws AlreadyRunningException
 	{
 		if(!this.running && this.thread == null)
 		{
@@ -45,7 +37,7 @@ public class Notify implements Runnable
 		}
 		else
 		{
-			throw new NotifyRunningException ();
+			throw new AlreadyRunningException ();
 		}
 	}
 
@@ -61,11 +53,11 @@ public class Notify implements Runnable
 		{
 			try
 			{
-				Thread.sleep(minInterval * scale);
+				Thread.sleep (minInterval);
 			}
 			catch (InterruptedException e)
 			{
-				Logger.getLogger (this.getClass ().toString ()).severe (e.getMessage ());
+				Log.throwException (e, this.getClass ());
 			}
 			updateTime ();
 		}
@@ -87,21 +79,10 @@ public class Notify implements Runnable
 		}
 	}
 
-	public static class NotifyRunningException extends Exception
-	{
-		public NotifyRunningException(String message, Throwable inner)
-		{
-			super(message, inner);
-		}
+	public static class AlreadyRunningException extends Exception {
 
-		public NotifyRunningException(String message)
-		{
-			super(message, null);
-		}
-
-		public NotifyRunningException()
-		{
-			super("Active notification.");
+		public AlreadyRunningException () {
+			super ("Notify is already running!");
 		}
 	}
 }
