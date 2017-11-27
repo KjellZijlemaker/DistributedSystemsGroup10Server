@@ -16,7 +16,7 @@ public class Event implements Serializable, Comparable<Event> {
 	/**
 	 * Creates an Event object
 	 *
-	 * @param id
+	 * @param id event id
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
