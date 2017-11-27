@@ -44,7 +44,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	}
 
 	/**
-	 * @param event
+	 * Adds Event to pending list of events
 	 */
 	public synchronized void addEvent (Event event) {
 		for (int i = 0; i < states.size (); ++i) {
