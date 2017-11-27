@@ -1,36 +1,50 @@
-package distributed.systems.das.server.events;
+package distributed.systems.das.events;
 
+import distributed.systems.das.GameState;
+import distributed.systems.das.util.Log;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TrailingStateSynchronization {
+public class TrailingStateSynchronization implements Notify.Listener {
 
-	private LinkedList<GameState> states = new LinkedList<GameState> ();
-	private List<Integer> delayIntervals = new ArrayList<> ();
+	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
+	private CopyOnWriteArrayList<Integer> delayIntervals = new CopyOnWriteArrayList<> ();
 	private EventList pendingEvents = new EventList ();
+	private Notify notify;
 
 	/**
 	 * @param startingState
-	 * @param delayInterval
+	 * @param delayInterval interval between the states. Must be divisible by {@code tickrate}
 	 * @param delays        number of delays
+	 * @param tickrate      rate at which time is updated
 	 */
-	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays) {
+	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays,
+										 int tickrate) {
+
+		if (delayInterval % tickrate != 0) {
+			throw new IllegalArgumentException ("TSS delayInterval MUST be divisble by tickrate!");
+		}
+
 		long time = startingState.getTime ();
+		this.notify = new Notify (tickrate);
+		try {
+			this.notify.start ();
+		} catch (Notify.AlreadyRunningException e) {
+			Log.throwException (e, this.getClass ());
+			// TODO: Handle this. Can probably just ignore, since it's already running.
+		}
+		this.notify.subscribe (this);
+
 		for (int i = 0; i < delays; ++i) { // create states
 			GameState state = new GameState (startingState);
-			state.setTime (time - (i * delayInterval)); // create trails
+			state.updateTime (time - (i * delayInterval)); // create trails
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
 		}
 	}
 
 	/**
-	 * @param event
+	 * Adds Event to pending list of events
 	 */
 	public synchronized void addEvent (Event event) {
 		for (int i = 0; i < states.size (); ++i) {
@@ -44,23 +58,22 @@ public class TrailingStateSynchronization {
 				pendingEvents.add (event);
 			}
 		}
-		// TODO: execute events from here?
 	}
 
-	public synchronized void executeEvent (Event event) {
+	/**
+	 * Executes top element of the pending list of events
+	 */
+	public synchronized void executeEvent () {
 		int i = 1;
+		Event event = pendingEvents.pop ();
 		GameState previousState = getState (0);
 
 		// Execute the command in the leading game state
 		previousState.execute (event);
 
-		ActionListener listener = new EventActionListener (i, previousState, event);
-
-		// Check back after delayInterval.get(i) to check whether the results are correct
-		for (i = i; i < states.size (); ++i) {
-			Timer timer = new Timer (delayIntervals.get (i), listener);
-
-		}
+		Notify.Listener listener = new EventActionListener (i, previousState, event.getId (),
+															event);
+		this.notify.subscribe (listener);
 	}
 
 	// TODO: We don't need the whole state, we only need to be able to detect inconsistencies
@@ -70,29 +83,50 @@ public class TrailingStateSynchronization {
 
 	/**
 	 * Returns whether the changes an event have made to two different states are the same
-	 *
-	 * @param x
-	 * @param y
 	 */
 	public synchronized boolean compareChanges (GameState x, GameState y) {
 		// TODO: Implement this.
 		return true;
 	}
 
-	private class EventActionListener implements ActionListener {
+	@Override
+	public void update (long time) {
+		for (int i = 0; i < states.size (); ++i) {
+			GameState state = states.get (i);
+			state.updateTime (time);
+		}
+	}
 
-		private int i;
+	private class EventActionListener implements Notify.Listener {
+
+		private final long tickRate;
+
+		private int index;
 		private GameState previousState;
+		private long eventId;
 		private Event event;
 
-		public EventActionListener (int i, GameState previousState, Event event) {
-			this.i = i;
+		private int counter;
+
+		public EventActionListener (int index, GameState previousState, long eventId, Event
+				event) {
+			this.index = index;
 			this.previousState = previousState;
+			this.eventId = eventId;
 			this.event = event;
+			this.counter = 0;
+			this.tickRate = notify.getTickRate ();
 		}
 
 		@Override
-		public void actionPerformed (ActionEvent e) {
+		public void update (long time) {
+			++counter;
+			if (tickRate / delayIntervals.get (index) == counter) {
+				checkConsistency ();
+			}
+		}
+
+		public void checkConsistency () {
 
 			// TODO: might instead need to track event by its id, and not execute it here
 
@@ -100,14 +134,14 @@ public class TrailingStateSynchronization {
 			// state that the execution of a command produced, and compares them with the
 			// changes recorded in the directly preceding state"
 
-			GameState currentState = getState (i);
+			GameState currentState = getState (index);
 			currentState.execute (event);
 			// TODO: Probably need to keep track of before and after states and compare diffs
 			if (!compareChanges (previousState, currentState)) {
 				long time = previousState.getTime ();
 
 				// TODO: More efficient way of replacing state? Perhaps only update select vars
-				// 		 That would also get rid of the useless setTime() call
+				// 		 That would also get rid of the useless updateTime() call
 				boolean success = previousState.replace (currentState);
 
 				if (!success) {
@@ -122,7 +156,7 @@ public class TrailingStateSynchronization {
 			}
 
 			previousState = currentState;
-			++this.i;
+			++this.index;
 		}
 	}
 

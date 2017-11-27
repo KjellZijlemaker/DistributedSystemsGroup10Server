@@ -1,10 +1,12 @@
-package distributed.systems.das.server.events;
+package distributed.systems.das;
+
+import distributed.systems.das.events.*;
 
 /**
  * Class containing the global gamestate. This
- * state contains small things, which all threads 
- * need to know. 
- * 
+ * state contains small things, which all threads
+ * need to know.
+ *
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public class GameState {
@@ -18,11 +20,14 @@ public class GameState {
 	private long time;
 	private long lastUpdate;
 	private EventList eventList;
+	private BattleField battleField;
 
 	public GameState (long time, EventList eventList) {
 		this.time = time;
 		this.lastUpdate = time;
 		this.eventList = eventList;
+
+		battleField = BattleField.getBattleField ();
 	}
 
 	public GameState (GameState newState) {
@@ -31,11 +36,22 @@ public class GameState {
 
 	/**
 	 * Runs an event. TODO: Write these classes and have them use subclasses of Event
+	 *
 	 * @param event the event to execute
 	 * @return true if successful
 	 */
 	public synchronized boolean execute (Event event) {
-		// move, attack, etc.
+		switch (event.getType ()) {
+			case Event.ATTACK:
+				battleField.attack ((Attack) event);
+				break;
+			case Event.HEAL:
+				battleField.heal ((Heal) event);
+				break;
+			case Event.MOVE:
+				battleField.move ((Move) event);
+				break;
+		}
 		return true;
 	}
 
@@ -56,10 +72,17 @@ public class GameState {
 
 	/**
 	 * Executes all the events that have happened since the time value for this object
-	 * @return
+	 *
+	 * @return true if successful
 	 */
 	public synchronized boolean synchronize () {
 		// TODO: Handle all the events that have happened since current time
+
+		for (Event event : this.eventList.getEventsByTime (this.lastUpdate, this.time)) {
+			execute (event);
+		}
+
+		this.lastUpdate = this.time;
 		return true;
 	}
 
@@ -71,6 +94,13 @@ public class GameState {
 		this.time = time;
 	}
 
+	/**
+	 * Increments the time by specified amount
+	 */
+	public synchronized void updateTime (long time) {
+		this.time += time;
+	}
+
 	public synchronized EventList getEventList () {
 		return this.eventList;
 	}
@@ -79,32 +109,26 @@ public class GameState {
 	 * Stop the program from running. Inform all threads
 	 * to close down.
 	 */
-	public static void haltProgram() {
+	public static void haltProgram () {
 		running = false;
 	}
 
 	/**
-	 * Get the current running state 
-	 * @return true if the program is supposed to 
+	 * Get the current running state
+	 *
+	 * @return true if the program is supposed to
 	 * keep running.
 	 */
-	public static boolean getRunningState() {
+	public static boolean getRunningState () {
 		return running;
 	}
 
 	/**
 	 * Get the number of players currently in the game.
+	 *
 	 * @return int: the number of players currently in the game.
 	 */
-	public static int getPlayerCount() {
+	public static int getPlayerCount () {
 		return playerCount;
-	}
-
-	/**
-	 * Increment the playercount
-	 * @return
-	 */
- 	public static synchronized void setPlayerCount(int count){
-		playerCount = count;
 	}
 }
