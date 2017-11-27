@@ -6,12 +6,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TrailingStateSynchronization {
 
-	private LinkedList<GameState> states = new LinkedList<GameState> ();
+	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private List<Integer> delayIntervals = new ArrayList<> ();
 	private EventList pendingEvents = new EventList ();
 
@@ -24,7 +24,7 @@ public class TrailingStateSynchronization {
 		long time = startingState.getTime ();
 		for (int i = 0; i < delays; ++i) { // create states
 			GameState state = new GameState (startingState);
-			state.setTime (time - (i * delayInterval)); // create trails
+			state.updateTime (time - (i * delayInterval)); // create trails
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
 		}
@@ -80,6 +80,14 @@ public class TrailingStateSynchronization {
 		return true;
 	}
 
+	public synchronized void updateTime (long time) {
+		for (int i = 0; i < states.size (); ++i) {
+			GameState state = states.get (i);
+			long delay = delayIntervals.get (i);
+			state.updateTime (time - delay);
+		}
+	}
+
 	private class EventActionListener implements ActionListener {
 
 		private int i;
@@ -108,7 +116,7 @@ public class TrailingStateSynchronization {
 				long time = previousState.getTime ();
 
 				// TODO: More efficient way of replacing state? Perhaps only update select vars
-				// 		 That would also get rid of the useless setTime() call
+				// 		 That would also get rid of the useless updateTime() call
 				boolean success = previousState.replace (currentState);
 
 				if (!success) {
@@ -118,7 +126,7 @@ public class TrailingStateSynchronization {
 				// Set the time to the actual time. synchronize() will then process all the
 				// events that now missing from the state because of overwriting the event list
 				// with the event list from the older state.
-				previousState.setTime (time);
+				previousState.updateTime (time);
 				previousState.synchronize ();
 			}
 

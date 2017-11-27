@@ -78,7 +78,7 @@ public class GameState {
 		return this.time;
 	}
 
-	public synchronized void setTime (long time) {
+	public synchronized void updateTime (long time) {
 		this.time = time;
 	}
 
