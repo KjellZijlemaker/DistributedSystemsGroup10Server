@@ -27,7 +27,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 										 int tickrate) {
 
 		if (delayInterval % tickrate != 0) {
-			throw new IllegalArgumentException ("delayInterval MUST be divisble by tickrate!");
+			throw new IllegalArgumentException ("TSS delayInterval MUST be divisble by tickrate!");
 		}
 
 		long time = startingState.getTime ();
