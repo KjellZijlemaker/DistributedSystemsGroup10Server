@@ -3,6 +3,7 @@ package distributed.systems.das.events;
 public class Heal extends Event {
 
 	private int targetX, targetY;
+	private int amount;
 
 	/**
 	 * Creates an Event object
@@ -12,10 +13,11 @@ public class Heal extends Event {
 	 * @param actor_id  The id of the actor that created this event
 	 */
 	public Heal (long id, long timestamp, int actor_id,
-				 int targetX, int targetY) {
+				 int targetX, int targetY, int amount) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
+		this.amount = amount;
 	}
 
 	@Override
@@ -39,12 +41,21 @@ public class Heal extends Event {
 		this.targetY = targetY;
 	}
 
+	public int getAmount () {
+		return amount;
+	}
+
+	public void setAmount (int amount) {
+		this.amount = amount;
+	}
+
 	public static class HealBuilder {
 
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
 		private int actor_id;
+		private int amount;
 
 		public HealBuilder (long id) {
 			this.id = id;
@@ -90,8 +101,16 @@ public class Heal extends Event {
 			this.actor_id = actor_id;
 		}
 
+		public int getAmount () {
+			return amount;
+		}
+
+		public void setAmount (int amount) {
+			this.amount = amount;
+		}
+
 		public Heal createEvent () {
-			return new Heal (id, timestamp, actor_id, targetX, targetY);
+			return new Heal (id, timestamp, actor_id, targetX, targetY, amount);
 		}
 	}
 }
