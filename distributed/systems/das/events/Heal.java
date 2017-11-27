@@ -1,6 +1,6 @@
 package distributed.systems.das.events;
 
-public class HealDamage extends Event {
+public class Heal extends Event {
 
 	private int targetX, targetY;
 
@@ -11,8 +11,8 @@ public class HealDamage extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	public HealDamage (long id, long timestamp, int actor_id,
-					   int targetX, int targetY) {
+	public Heal (long id, long timestamp, int actor_id,
+				 int targetX, int targetY) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
@@ -34,14 +34,14 @@ public class HealDamage extends Event {
 		this.targetY = targetY;
 	}
 
-	public static class HealDamageBuilder {
+	public static class HealBuilder {
 
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
 		private int actor_id;
 
-		public HealDamageBuilder (long id) {
+		public HealBuilder (long id) {
 			this.id = id;
 		}
 
@@ -85,8 +85,8 @@ public class HealDamage extends Event {
 			this.actor_id = actor_id;
 		}
 
-		public HealDamage createEvent () {
-			return new HealDamage (id, timestamp, actor_id, targetX, targetY);
+		public Heal createEvent () {
+			return new Heal (id, timestamp, actor_id, targetX, targetY);
 		}
 	}
 }
