@@ -1,21 +1,28 @@
-package distributed.systems.das.events;
+package distributed.systems.das.server.events;
 
-public class Attack extends Event {
+public class Heal extends Event {
 
 	private int targetX, targetY;
-	private int damage;
+	private int amount;
 
-	public Attack (long id, long timestamp, int actor_id,
-				   int targetX, int targetY, int damage) {
+	/**
+	 * Creates an Event object
+	 *
+	 * @param id        event id
+	 * @param timestamp The time when the event occurs
+	 * @param actor_id  The id of the actor that created this event
+	 */
+	public Heal (long id, long timestamp, int actor_id,
+				 int targetX, int targetY, int amount) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
-		this.damage = damage;
+		this.amount = amount;
 	}
 
 	@Override
 	public int getType () {
-		return ATTACK;
+		return HEAL;
 	}
 
 	public int getTargetX () {
@@ -34,23 +41,23 @@ public class Attack extends Event {
 		this.targetY = targetY;
 	}
 
-	public int getDamage () {
-		return damage;
+	public int getAmount () {
+		return amount;
 	}
 
-	public void setDamage (int damage) {
-		this.damage = damage;
+	public void setAmount (int amount) {
+		this.amount = amount;
 	}
 
-	public static class AttackBuilder {
+	public static class HealBuilder {
 
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
 		private int actor_id;
-		private int damage;
+		private int amount;
 
-		public AttackBuilder (long id) {
+		public HealBuilder (long id) {
 			this.id = id;
 		}
 
@@ -94,17 +101,16 @@ public class Attack extends Event {
 			this.actor_id = actor_id;
 		}
 
-		public int getDamage () {
-			return damage;
+		public int getAmount () {
+			return amount;
 		}
 
-		public void setDamage (int damage) {
-			this.damage = damage;
+		public void setAmount (int amount) {
+			this.amount = amount;
 		}
 
-		public Attack createEvent () {
-			return new Attack (id, timestamp, actor_id, targetX, targetY, damage);
+		public Heal createEvent () {
+			return new Heal (id, timestamp, actor_id, targetX, targetY, amount);
 		}
 	}
-
 }

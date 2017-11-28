@@ -1,4 +1,4 @@
-package distributed.systems.das.events;
+package distributed.systems.das.server.events;
 
 /**
  * Created by Jasper van Riet

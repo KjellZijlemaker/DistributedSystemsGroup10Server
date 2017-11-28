@@ -1,4 +1,4 @@
-package distributed.systems.das.util;
+package distributed.systems.das.server.util;
 
 import java.util.logging.Logger;
 

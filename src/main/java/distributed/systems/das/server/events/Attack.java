@@ -1,28 +1,21 @@
-package distributed.systems.das.events;
+package distributed.systems.das.server.events;
 
-public class Heal extends Event {
+public class Attack extends Event {
 
 	private int targetX, targetY;
-	private int amount;
+	private int damage;
 
-	/**
-	 * Creates an Event object
-	 *
-	 * @param id        event id
-	 * @param timestamp The time when the event occurs
-	 * @param actor_id  The id of the actor that created this event
-	 */
-	public Heal (long id, long timestamp, int actor_id,
-				 int targetX, int targetY, int amount) {
+	public Attack (long id, long timestamp, int actor_id,
+				   int targetX, int targetY, int damage) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
-		this.amount = amount;
+		this.damage = damage;
 	}
 
 	@Override
 	public int getType () {
-		return HEAL;
+		return ATTACK;
 	}
 
 	public int getTargetX () {
@@ -41,23 +34,23 @@ public class Heal extends Event {
 		this.targetY = targetY;
 	}
 
-	public int getAmount () {
-		return amount;
+	public int getDamage () {
+		return damage;
 	}
 
-	public void setAmount (int amount) {
-		this.amount = amount;
+	public void setDamage (int damage) {
+		this.damage = damage;
 	}
 
-	public static class HealBuilder {
+	public static class AttackBuilder {
 
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
 		private int actor_id;
-		private int amount;
+		private int damage;
 
-		public HealBuilder (long id) {
+		public AttackBuilder (long id) {
 			this.id = id;
 		}
 
@@ -101,16 +94,17 @@ public class Heal extends Event {
 			this.actor_id = actor_id;
 		}
 
-		public int getAmount () {
-			return amount;
+		public int getDamage () {
+			return damage;
 		}
 
-		public void setAmount (int amount) {
-			this.amount = amount;
+		public void setDamage (int damage) {
+			this.damage = damage;
 		}
 
-		public Heal createEvent () {
-			return new Heal (id, timestamp, actor_id, targetX, targetY, amount);
+		public Attack createEvent () {
+			return new Attack (id, timestamp, actor_id, targetX, targetY, damage);
 		}
 	}
+
 }

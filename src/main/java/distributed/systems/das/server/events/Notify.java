@@ -1,6 +1,6 @@
-package distributed.systems.das.events;
+package distributed.systems.das.server.events;
 
-import distributed.systems.das.util.Log;
+import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 

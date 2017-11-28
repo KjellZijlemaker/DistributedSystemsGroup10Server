@@ -1,10 +1,8 @@
 package distributed.systems.das.server.Services;
 
-import distributed.systems.das.server.Beans.User;
 import distributed.systems.das.server.Interfaces.RMIGameStateInfo;
 import distributed.systems.das.server.Interfaces.RMIGameStateUpdate;
-import distributed.systems.das.server.events.EventList;
-import distributed.systems.das.server.events.GameState;
+import distributed.systems.das.server.GameState;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

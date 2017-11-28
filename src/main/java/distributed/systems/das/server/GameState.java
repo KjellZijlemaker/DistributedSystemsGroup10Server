@@ -1,6 +1,6 @@
-package distributed.systems.das;
+package distributed.systems.das.server;
 
-import distributed.systems.das.events.*;
+import distributed.systems.das.server.events.*;
 
 /**
  * Class containing the global gamestate. This
