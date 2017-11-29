@@ -84,7 +84,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	/**
 	 * Returns whether the changes an event have made to two different states are the same
 	 */
-	public synchronized boolean compareChanges (GameState x, GameState y) {
+	public synchronized boolean compareStates (GameState x, GameState y) {
 		return x == y;
 	}
 
@@ -136,7 +136,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 			GameState currentState = getState (index);
 			currentState.execute (event);
 			// TODO: Probably need to keep track of before and after states and compare diffs
-			if (!compareChanges (previousState, currentState)) {
+			if (!compareStates (previousState, currentState)) {
 				long time = previousState.getTime ();
 
 				// TODO: More efficient way of replacing state? Perhaps only update select vars
