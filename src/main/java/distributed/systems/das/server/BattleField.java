@@ -6,7 +6,7 @@ import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Move;
 
-public class Battlefield implements IMessageReceivedHandler {
+public class BattleField implements IMessageReceivedHandler {
     /* The array of units */
     private Unit[][] map;
 
@@ -31,7 +31,7 @@ public class Battlefield implements IMessageReceivedHandler {
      * @param width of the battlefield
      * @param height of the battlefield
      */
-    private BattleField(int width, int height) {
+    private BattleField (int width, int height) {
         Socket local = new LocalSocket();
 
         synchronized (this) {
