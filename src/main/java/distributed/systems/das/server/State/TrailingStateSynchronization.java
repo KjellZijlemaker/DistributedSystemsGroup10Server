@@ -37,7 +37,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 		this.notify.subscribe (this);
 
 		for (int i = 0; i < delays; ++i) { // create states
-			GameState state = new GameState (startingState);
+			GameState state = GameState.clone (startingState);
 			state.updateTime (time - (i * delayInterval)); // create trails
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
@@ -67,13 +67,14 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	public synchronized void executeEvent () {
 		int i = 1;
 		Event event = pendingEvents.pop ();
-		GameState previousState = getState (0);
+		GameState beforeState = GameState.clone (getState (0));
+		GameState afterState = getState (0);
 
 		// Execute the command in the leading game state
-		previousState.execute (event);
+		afterState.execute (event);
 
-		Notify.Listener listener = new EventActionListener (i, previousState, event.getId (),
-															event);
+		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
+															event.getId (), event);
 		this.notify.subscribe (listener);
 	}
 
@@ -102,16 +103,18 @@ public class TrailingStateSynchronization implements Notify.Listener {
 		private final long tickRate;
 
 		private int index;
-		private GameState previousState;
+		private GameState before;
+		private GameState after;
 		private long eventId;
 		private Event event;
 
 		private int counter;
 
-		public EventActionListener (int index, GameState previousState, long eventId, Event
-				event) {
+		public EventActionListener (int index, GameState before,
+									GameState after, long eventId, Event event) {
 			this.index = index;
-			this.previousState = previousState;
+			this.before = before;
+			this.after = after;
 			this.eventId = eventId;
 			this.event = event;
 			this.counter = 0;
@@ -134,15 +137,16 @@ public class TrailingStateSynchronization implements Notify.Listener {
 			// state that the execution of a command produced, and compares them with the
 			// changes recorded in the directly preceding state"
 
-			GameState currentState = getState (index);
-			currentState.execute (event);
-			// TODO: Probably need to keep track of before and after states and compare diffs
-			if (!compareStates (previousState, currentState)) {
-				long time = previousState.getTime ();
+			GameState comparisonAfter = getState (index);
+			GameState comparisonBefore = GameState.clone (comparisonAfter);
+			comparisonAfter.execute (event);
+			if (!compareStates (this.before, comparisonBefore) ||
+				!compareStates (this.after, comparisonAfter)) {
+				long time = this.after.getTime ();
 
 				// TODO: More efficient way of replacing state? Perhaps only update select vars
 				// 		 That would also get rid of the useless updateTime() call
-				boolean success = previousState.replace (currentState);
+				boolean success = this.after.replace (comparisonAfter);
 
 				if (!success) {
 					// TODO: Handle error
@@ -151,11 +155,12 @@ public class TrailingStateSynchronization implements Notify.Listener {
 				// Set the time to the actual time. synchronize() will then process all the
 				// events that now missing from the state because of overwriting the event list
 				// with the event list from the older state.
-				previousState.setTime (time);
-				previousState.synchronize ();
+				this.after.setTime (time);
+				this.after.synchronize ();
 			}
 
-			previousState = currentState;
+			this.before = comparisonBefore;
+			this.after = comparisonAfter;
 			++this.index;
 		}
 	}
