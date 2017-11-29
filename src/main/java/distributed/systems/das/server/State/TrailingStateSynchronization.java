@@ -98,8 +98,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 
 	@Override
 	public void update (long time) {
-		for (int i = 0; i < states.size (); ++i) {
-			GameState state = states.get (i);
+		for (GameState state : states) {
 			state.updateTime (time);
 		}
 	}
