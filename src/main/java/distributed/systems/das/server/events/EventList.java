@@ -65,6 +65,10 @@ public class EventList implements Iterable<Event>, Serializable {
 		}
 		return newList;
 	}
+
+	public boolean isEmpty () {
+		return this.events.isEmpty ();
+	}
 	
 	/**
 	 * Returns the top element and removes it.
