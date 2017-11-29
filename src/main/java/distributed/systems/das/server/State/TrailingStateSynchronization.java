@@ -4,6 +4,7 @@ import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Services.WishList;
 import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
+import distributed.systems.das.server.util.AlreadyRunningException;
 import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -11,12 +12,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Implementation of the TSS algorithm. Use the TSSBuilder class to instantiate.
  */
-public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler {
+public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler,
+													 Runnable {
 
 	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private CopyOnWriteArrayList<Integer> delayIntervals = new CopyOnWriteArrayList<> ();
 	private EventList pendingEvents = new EventList ();
 	private Notify notify;
+
+	// Indicates whether TSS has run out of events to execute and is now waiting
+	private boolean running = false;
+	private Thread thread = null;
 
 	/**
 	 * @param startingState
@@ -35,7 +41,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		this.notify = new Notify (tickrate);
 		try {
 			this.notify.start ();
-		} catch (Notify.AlreadyRunningException e) {
+		} catch (AlreadyRunningException e) {
 			Log.throwException (e, this.getClass ());
 			// TODO: Handle this. Can probably just ignore, since it's already running.
 		}
@@ -47,6 +53,16 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			state.updateTime (time - (i * delayInterval)); // create trails
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
+		}
+	}
+
+	private synchronized void start () throws AlreadyRunningException {
+		if (!this.running && this.thread == null) {
+			this.thread = new Thread (this);
+			this.running = true;
+			thread.start ();
+		} else {
+			throw new AlreadyRunningException (this.getClass ());
 		}
 	}
 
@@ -69,9 +85,13 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 
 	/**
 	 * Executes top element of the pending list of events
+	 * @return false if no more events left to execute
 	 */
-	public synchronized void executeEvent () {
+	public synchronized boolean executeEvent () {
 		int i = 1;
+		if (pendingEvents.isEmpty ()) {
+			return false;
+		}
 		Event event = pendingEvents.pop ();
 		GameState beforeState = GameState.clone (getState (0));
 		GameState afterState = getState (0);
@@ -82,6 +102,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
 															event.getId (), event);
 		this.notify.subscribe (listener);
+		return true;
 	}
 
 	// TODO: We don't need the whole state, we only need to be able to detect inconsistencies
@@ -101,11 +122,22 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		for (GameState state : states) {
 			state.updateTime (time);
 		}
+		if (!running) {
+			this.running = true;
+			thread.start ();
+		}
 	}
 
 	@Override
 	public void onMessageReceived (Event event) {
 		addEvent (event);
+	}
+
+	@Override
+	public void run () {
+		while (running) {
+			running = executeEvent ();
+		}
 	}
 
 	private class EventActionListener implements Notify.Listener {
