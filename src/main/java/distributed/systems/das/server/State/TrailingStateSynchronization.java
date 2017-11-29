@@ -33,8 +33,9 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	private TrailingStateSynchronization (GameState startingState, int delayInterval,
 										  int delays, int tickrate, WishList wishList) {
 
-		if (delayInterval % tickrate != 0) {
+		if (delayInterval % tickrate != 0 && delayInterval > tickrate) {
 			throw new IllegalArgumentException ("TSS delayInterval MUST be divisible by " +
+												"tickrate and delayInterval MUST be larger than " +
 												"tickrate!");
 		}
 
