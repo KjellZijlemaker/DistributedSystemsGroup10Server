@@ -13,7 +13,7 @@ public class Core {
         WishList wishList = new WishList();
         Naming.rebind("//:5001/wishes", wishList);
 
-//        Naming.rebind("//:5001/battlefield", Battlefield);
+//        Naming.rebind("//:5001/battlefield", BattleField);
 
 //        UpdateGameState sii = new UpdateGameState(wishList);
 //        Naming.rebind("//:5001/auth", sii);

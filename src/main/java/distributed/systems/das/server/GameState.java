@@ -105,6 +105,27 @@ public class GameState {
 		return this.eventList;
 	}
 
+	public synchronized BattleField getBattleField () {
+		return this.battleField;
+	}
+
+	@Override
+	public boolean equals (Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (this.getClass () != obj.getClass ()) {
+			return false;
+		}
+		GameState state = (GameState) obj;
+
+
+		return (this.time == state.getTime ()) &&
+				(this.eventList == state.getEventList ()) &&
+				(this.battleField == state.getBattleField ());
+	}
+
 	/**
 	 * Stop the program from running. Inform all threads
 	 * to close down.

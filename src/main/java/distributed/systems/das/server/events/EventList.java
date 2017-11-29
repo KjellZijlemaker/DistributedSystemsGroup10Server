@@ -1,6 +1,8 @@
 package distributed.systems.das.server.events;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -67,6 +69,31 @@ public class EventList implements Iterable<Event>, Serializable {
 	@Override
 	public String toString () {
 		return this.events.toString ();
+	}
+
+	@Override
+	public boolean equals (Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (this.getClass () != obj.getClass ()) {
+			return false;
+		}
+		EventList list = (EventList) obj;
+
+		if (this.events != null || list.getEvents () != null ||
+				this.events.size () == list.getEvents ().size ()) {
+			return false;
+		}
+
+		ArrayList<Event> x = new ArrayList<> (this.events);
+		ArrayList<Event> y = new ArrayList<> (list.getEvents ());
+
+		Collections.sort (x);
+		Collections.sort (y);
+
+		return x.equals (y);
 	}
 
 }

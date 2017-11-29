@@ -6,39 +6,32 @@ import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Move;
 
-public class Battlefield implements IMessageReceivedHandler {
+import java.util.ArrayList;
+
+public class BattleField implements IMessageReceivedHandler {
     /* The array of units */
     private Unit[][] map;
 
     /* The static singleton */
     private static BattleField battlefield;
 
-    /* Primary socket of the battlefield */
-    private Socket serverSocket;
-
     /* The last id that was assigned to an unit. This variable is used to
      * enforce that each unit has its own unique id.
      */
     private int lastUnitID = 0;
 
-    public final static String serverID = "server";
     public final static int MAP_WIDTH = 25;
     public final static int MAP_HEIGHT = 25;
-    private ArrayList <Unit> units;
+	private ArrayList<Unit> units;
 
     /**
      * Initialize the battlefield to the specified size
      * @param width of the battlefield
      * @param height of the battlefield
      */
-    private BattleField(int width, int height) {
-        Socket local = new LocalSocket();
-
+    private BattleField (int width, int height) {
         synchronized (this) {
             map = new Unit[width][height];
-            local.register(BattleField.serverID);
-            serverSocket = new SynchronizedSocket(local);
-            serverSocket.addMessageReceivedHandler(this);
             units = new ArrayList<Unit>();
         }
 
@@ -126,9 +119,9 @@ public class Battlefield implements IMessageReceivedHandler {
      * Move the specified unit a certain number of steps.
      *
      * @param unit is the unit being moved.
-     * @param deltax is the delta in the x position.
-     * @param deltay is the delta in the y position.
-     *
+	 * @param newX is the delta in the x position.
+	 * @param newY is the delta in the y position.
+	 *
      * @return true on success.
      */
     private synchronized boolean moveUnit(Unit unit, int newX, int newY)
@@ -163,7 +156,6 @@ public class Battlefield implements IMessageReceivedHandler {
         if (unitToRemove == null)
             return; // There was no unit here to remove
         map[x][y] = null;
-        unitToRemove.disconnect();
         units.remove(unitToRemove);
     }
 
@@ -290,18 +282,26 @@ public class Battlefield implements IMessageReceivedHandler {
         }
     }
 
-    /**
-     * Close down the battlefield. Unregisters
-     * the serverSocket so the program can
-     * actually end.
-     */
-    public synchronized void shutdown() {
-        // Remove all units from the battlefield and make them disconnect from the server
-        for (Unit unit : units) {
-            unit.disconnect();
-            unit.stopRunnerThread();
-        }
+	@Override
+	public boolean equals (Object obj) {
+		if (this == obj) {
+			return true;
+		}
 
-        serverSocket.unRegister();
-    }
+		if (this.getClass () != obj.getClass ()) {
+			return false;
+		}
+		BattleField battleField = (BattleField) obj;
+		for (int x = 0; x < MAP_WIDTH; ++x) {
+			for (int y = 0; y < MAP_HEIGHT; ++y) {
+				if (map[x][y] == battleField.getUnit (x, y)) {
+					return false;
+				}
+			}
+		}
+	
+		return true;
+	}
+
+
 }
