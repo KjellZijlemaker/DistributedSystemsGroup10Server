@@ -112,7 +112,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		afterState.execute (event);
 
 		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
-															event.getId (), event);
+															event);
 		this.notify.subscribe (listener);
 		return true;
 	}
@@ -165,11 +165,11 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		private int counter;
 
 		public EventActionListener (int index, GameState before,
-									GameState after, long eventId, Event event) {
+									GameState after, Event event) {
 			this.index = index;
 			this.before = before;
 			this.after = after;
-			this.eventId = eventId;
+			this.eventId = event.getId ();
 			this.event = event;
 			this.counter = 0;
 			this.tickRate = notify.getTickRate ();
