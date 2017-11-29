@@ -85,8 +85,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	 * Returns whether the changes an event have made to two different states are the same
 	 */
 	public synchronized boolean compareChanges (GameState x, GameState y) {
-		// TODO: Implement this.
-		return true;
+		return x == y;
 	}
 
 	@Override
