@@ -152,4 +152,11 @@ public class GameState {
 	public static int getPlayerCount () {
 		return playerCount;
 	}
+
+	/**
+	 * Sets the number of players currently in the game
+	 */
+	public static void setPlayerCount (int players) {
+		playerCount = players;
+	}
 }
