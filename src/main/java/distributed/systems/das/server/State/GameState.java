@@ -1,4 +1,4 @@
-package distributed.systems.das.server;
+package distributed.systems.das.server.State;
 
 import distributed.systems.das.server.events.*;
 
@@ -26,12 +26,22 @@ public class GameState {
 		this.time = time;
 		this.lastUpdate = time;
 		this.eventList = eventList;
-
-		battleField = BattleField.getBattleField ();
+		this.battleField = BattleField.getBattleField ();
 	}
 
-	public GameState (GameState newState) {
-		replace (newState);
+	private GameState (long time, EventList eventList, long lastUpdate, BattleField battleField) {
+		this.time = time;
+		this.lastUpdate = lastUpdate;
+		this.eventList = eventList;
+		this.battleField = battleField;
+	}
+
+	public static GameState clone (GameState toCopy) {
+		return new GameState (
+				toCopy.getTime (),
+				new EventList (toCopy.getEventList ()),
+				toCopy.getLastUpdate (),
+				BattleField.clone (toCopy.getBattleField ()));
 	}
 
 	/**
@@ -41,6 +51,7 @@ public class GameState {
 	 * @return true if successful
 	 */
 	public synchronized boolean execute (Event event) {
+		eventList.add (event);
 		switch (event.getType ()) {
 			case Event.ATTACK:
 				battleField.attack ((Attack) event);
@@ -101,6 +112,14 @@ public class GameState {
 		this.time += time;
 	}
 
+	public long getLastUpdate () {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate (long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
 	public synchronized EventList getEventList () {
 		return this.eventList;
 	}
@@ -151,5 +170,12 @@ public class GameState {
 	 */
 	public static int getPlayerCount () {
 		return playerCount;
+	}
+
+	/**
+	 * Sets the number of players currently in the game
+	 */
+	public static void setPlayerCount (int players) {
+		playerCount = players;
 	}
 }

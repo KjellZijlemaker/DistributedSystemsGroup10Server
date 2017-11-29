@@ -1,15 +1,14 @@
-package distributed.systems.das.server;
+package distributed.systems.das.server.State;
 
-import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
+import distributed.systems.das.server.Unit;
 import distributed.systems.das.server.events.Attack;
-import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Move;
 
 import java.util.ArrayList;
 
-public class BattleField implements IMessageReceivedHandler {
-    /* The array of units */
+public class BattleField {
+	/* The array of units */
     private Unit[][] map;
 
     /* The static singleton */
@@ -31,11 +30,31 @@ public class BattleField implements IMessageReceivedHandler {
      */
     private BattleField (int width, int height) {
         synchronized (this) {
-            map = new Unit[width][height];
-            units = new ArrayList<Unit>();
-        }
-
+			this.map = new Unit[width][height];
+			this.units = new ArrayList<Unit> ();
+		}
     }
+
+	private BattleField (int width, int height, Unit[][] map, ArrayList<Unit> units, int
+			lastUnitID) {
+		synchronized (this) {
+			this.map = new Unit[width][height];
+			for (int x = 0; x < width; ++x) {
+				System.arraycopy (map[x], 0, this.map[x], 0, height);
+			}
+			this.units = new ArrayList<Unit> (units);
+			this.lastUnitID = lastUnitID;
+		}
+	}
+
+	public static BattleField clone (BattleField battleField) {
+		Unit[][] map = battleField.getMap ();
+		return new BattleField (map.length,
+								map[0].length,
+								map,
+								battleField.getUnits (),
+								battleField.getLastUnitID ());
+	}
 
     /**
      * Singleton method which returns the sole
@@ -159,6 +178,10 @@ public class BattleField implements IMessageReceivedHandler {
         units.remove(unitToRemove);
     }
 
+	public int getLastUnitID () {
+		return this.lastUnitID;
+	}
+
     /**
      * Returns a new unique unit ID.
      * @return int: a new unique unit ID.
@@ -192,96 +215,6 @@ public class BattleField implements IMessageReceivedHandler {
         this.moveUnit (unit, x, y);
     }
 
-    public void onMessageReceived(Event msg) {
-        Message reply = null;
-        String origin = (String)msg.get("origin");
-        MessageRequest request = (MessageRequest)msg.get("request");
-        Unit unit;
-        switch(request)
-        {
-            case spawnUnit:
-                this.spawnUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
-                break;
-            case putUnit:
-                this.putUnit((Unit)msg.get("unit"), (Integer)msg.get("x"), (Integer)msg.get("y"));
-                break;
-            case getUnit:
-            {
-                reply = new Message();
-                int x = (Integer)msg.get("x");
-                int y = (Integer)msg.get("y");
-				/* Copy the id of the message so that the unit knows
-				 * what message the battlefield responded to.
-				 */
-                reply.put("id", msg.get("id"));
-                // Get the unit at the specific location
-                reply.put("unit", getUnit(x, y));
-                break;
-            }
-            case getType:
-            {
-                reply = new Message();
-                int x = (Integer)msg.get("x");
-                int y = (Integer)msg.get("y");
-				/* Copy the id of the message so that the unit knows
-				 * what message the battlefield responded to.
-				 */
-                reply.put("id", msg.get("id"));
-                if (getUnit(x, y) instanceof Player)
-                    reply.put("type", UnitType.player);
-                else if (getUnit(x, y) instanceof Dragon)
-                    reply.put("type", UnitType.dragon);
-                else reply.put("type", UnitType.undefined);
-                break;
-            }
-            case dealDamage:
-            {
-                int x = (Integer)msg.get("x");
-                int y = (Integer)msg.get("y");
-                unit = this.getUnit(x, y);
-                if (unit != null)
-                    unit.adjustHitPoints( -(Integer)msg.get("damage") );
-				/* Copy the id of the message so that the unit knows
-				 * what message the battlefield responded to.
-				 */
-                break;
-            }
-            case healDamage:
-            {
-                int x = (Integer)msg.get("x");
-                int y = (Integer)msg.get("y");
-                unit = this.getUnit(x, y);
-                if (unit != null)
-                    unit.adjustHitPoints( (Integer)msg.get("healed") );
-				/* Copy the id of the message so that the unit knows
-				 * what message the battlefield responded to.
-				 */
-                break;
-            }
-            case moveUnit:
-                reply = new Message();
-                this.moveUnit ((Unit) msg.get ("unit"), (Integer) msg.get ("x"),
-                        (Integer) msg.get ("y"));
-				/* Copy the id of the message so thaoveUnit((Unit)msg.get("unit"), (Integer)msg
-				.get("x"t the unit knows
-				 * what message the battlefield responded to.
-				 */
-                reply.put("id", msg.get("id"));
-                break;
-            case removeUnit:
-                this.removeUnit((Integer)msg.get("x"), (Integer)msg.get("y"));
-                return;
-        }
-
-        try {
-            if (reply != null)
-                serverSocket.sendMessage(reply, origin);
-        }
-        catch(IDNotAssignedException idnae)  {
-            // Could happen if the target already logged out
-        }
-    }
-
 	@Override
 	public boolean equals (Object obj) {
 		if (this == obj) {
@@ -303,5 +236,19 @@ public class BattleField implements IMessageReceivedHandler {
 		return true;
 	}
 
+	public Unit[][] getMap () {
+		return map;
+	}
 
+	public synchronized void setMap (Unit[][] map) {
+		this.map = map;
+	}
+
+	public ArrayList<Unit> getUnits () {
+		return units;
+	}
+
+	public synchronized void setUnits (ArrayList<Unit> units) {
+		this.units = units;
+	}
 }

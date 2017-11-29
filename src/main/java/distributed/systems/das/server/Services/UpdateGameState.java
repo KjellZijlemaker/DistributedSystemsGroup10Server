@@ -2,11 +2,13 @@ package distributed.systems.das.server.Services;
 
 import distributed.systems.das.server.Interfaces.RMIGameStateInfo;
 import distributed.systems.das.server.Interfaces.RMIGameStateUpdate;
-import distributed.systems.das.server.GameState;
+import distributed.systems.das.server.State.GameState;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Enumeration;
+import java.util.Vector;
 
 public class UpdateGameState extends UnicastRemoteObject implements RMIGameStateInfo, Runnable {
 

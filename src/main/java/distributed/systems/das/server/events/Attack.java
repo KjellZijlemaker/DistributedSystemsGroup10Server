@@ -5,8 +5,8 @@ public class Attack extends Event {
 	private int targetX, targetY;
 	private int damage;
 
-	public Attack (long id, long timestamp, int actor_id,
-				   int targetX, int targetY, int damage) {
+	private Attack (long id, long timestamp, int actor_id,
+					int targetX, int targetY, int damage) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
