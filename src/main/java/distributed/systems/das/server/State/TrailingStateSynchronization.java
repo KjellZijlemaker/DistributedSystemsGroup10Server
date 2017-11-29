@@ -1,12 +1,17 @@
 package distributed.systems.das.server.State;
 
+import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
+import distributed.systems.das.server.Services.WishList;
 import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TrailingStateSynchronization implements Notify.Listener {
+/**
+ * Implementation of the TSS algorithm. Use the TSSBuilder class to instantiate.
+ */
+public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler {
 
 	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private CopyOnWriteArrayList<Integer> delayIntervals = new CopyOnWriteArrayList<> ();
@@ -19,8 +24,8 @@ public class TrailingStateSynchronization implements Notify.Listener {
 	 * @param delays        number of delays
 	 * @param tickrate      rate at which time is updated
 	 */
-	public TrailingStateSynchronization (GameState startingState, int delayInterval, int delays,
-										 int tickrate) {
+	private TrailingStateSynchronization (GameState startingState, int delayInterval,
+										  int delays, int tickrate, WishList wishList) {
 
 		if (delayInterval % tickrate != 0) {
 			throw new IllegalArgumentException ("TSS delayInterval MUST be divisble by tickrate!");
@@ -35,6 +40,7 @@ public class TrailingStateSynchronization implements Notify.Listener {
 			// TODO: Handle this. Can probably just ignore, since it's already running.
 		}
 		this.notify.subscribe (this);
+		wishList.registerListener (this);
 
 		for (int i = 0; i < delays; ++i) { // create states
 			GameState state = GameState.clone (startingState);
@@ -96,6 +102,11 @@ public class TrailingStateSynchronization implements Notify.Listener {
 			GameState state = states.get (i);
 			state.updateTime (time);
 		}
+	}
+
+	@Override
+	public void onMessageReceived (Event event) {
+		addEvent (event);
 	}
 
 	private class EventActionListener implements Notify.Listener {
@@ -162,6 +173,55 @@ public class TrailingStateSynchronization implements Notify.Listener {
 			this.before = comparisonBefore;
 			this.after = comparisonAfter;
 			++this.index;
+		}
+	}
+
+	public static class TSSBuilder {
+		private GameState startingState;
+		private int delayInterval;
+		private int delays;
+		private int tickrate;
+		private WishList wishList;
+
+		public TSSBuilder (GameState startingState) {
+			this.startingState = startingState;
+		}
+
+		public int getDelayInterval () {
+			return delayInterval;
+		}
+
+		public void setDelayInterval (int delayInterval) {
+			this.delayInterval = delayInterval;
+		}
+
+		public int getDelays () {
+			return delays;
+		}
+
+		public void setDelays (int delays) {
+			this.delays = delays;
+		}
+
+		public int getTickrate () {
+			return tickrate;
+		}
+
+		public void setTickrate (int tickrate) {
+			this.tickrate = tickrate;
+		}
+
+		public WishList getWishList () {
+			return wishList;
+		}
+
+		public void setWishList (WishList wishList) {
+			this.wishList = wishList;
+		}
+
+		public TrailingStateSynchronization createTSS () {
+			return new TrailingStateSynchronization (this.startingState, this.delayInterval,
+													 this.delays, this.tickrate, this.wishList);
 		}
 	}
 
