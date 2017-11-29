@@ -26,12 +26,22 @@ public class GameState {
 		this.time = time;
 		this.lastUpdate = time;
 		this.eventList = eventList;
-
-		battleField = BattleField.getBattleField ();
+		this.battleField = BattleField.getBattleField ();
 	}
 
-	public GameState (GameState newState) {
-		replace (newState);
+	private GameState (long time, EventList eventList, long lastUpdate, BattleField battleField) {
+		this.time = time;
+		this.lastUpdate = lastUpdate;
+		this.eventList = eventList;
+		this.battleField = battleField;
+	}
+
+	public static GameState clone (GameState toCopy) {
+		return new GameState (
+				toCopy.getTime (),
+				new EventList (toCopy.getEventList ()),
+				toCopy.getLastUpdate (),
+				BattleField.clone (toCopy.getBattleField ()));
 	}
 
 	/**
@@ -99,6 +109,14 @@ public class GameState {
 	 */
 	public synchronized void updateTime (long time) {
 		this.time += time;
+	}
+
+	public long getLastUpdate () {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate (long lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 	public synchronized EventList getEventList () {
