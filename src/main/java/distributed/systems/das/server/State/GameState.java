@@ -51,6 +51,7 @@ public class GameState {
 	 * @return true if successful
 	 */
 	public synchronized boolean execute (Event event) {
+		eventList.add (event);
 		switch (event.getType ()) {
 			case Event.ATTACK:
 				battleField.attack ((Attack) event);
