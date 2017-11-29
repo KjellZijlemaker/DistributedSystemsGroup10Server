@@ -37,16 +37,8 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			throw new IllegalArgumentException ("TSS delayInterval MUST be divisble by tickrate!");
 		}
 
+		subscribeToNotifications (tickrate, wishList);
 		long time = startingState.getTime ();
-		this.notify = new Notify (tickrate);
-		try {
-			this.notify.start ();
-		} catch (AlreadyRunningException e) {
-			Log.throwException (e, this.getClass ());
-			// TODO: Handle this. Can probably just ignore, since it's already running.
-		}
-		this.notify.subscribe (this);
-		wishList.registerListener (this);
 
 		for (int i = 0; i < delays; ++i) { // create states
 			GameState state = GameState.clone (startingState);
@@ -61,6 +53,18 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			Log.throwException (e, this.getClass ());
 			e.printStackTrace ();
 		}
+	}
+
+	private synchronized void subscribeToNotifications (int tickrate, WishList wishList) {
+		this.notify = new Notify (tickrate);
+		try {
+			this.notify.start ();
+		} catch (AlreadyRunningException e) {
+			Log.throwException (e, this.getClass ());
+			// TODO: Handle this. Can probably just ignore, since it's already running.
+		}
+		this.notify.subscribe (this);
+		wishList.registerListener (this);
 	}
 
 	private synchronized void start () throws AlreadyRunningException {
