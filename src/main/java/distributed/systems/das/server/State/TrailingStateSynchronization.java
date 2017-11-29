@@ -20,7 +20,6 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	private EventList pendingEvents = new EventList ();
 	private Notify notify;
 
-	// Indicates whether TSS has run out of events to execute and is now waiting
 	private boolean running = false;
 	private Thread thread = null;
 
