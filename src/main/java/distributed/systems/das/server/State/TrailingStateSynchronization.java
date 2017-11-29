@@ -191,7 +191,8 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 				boolean success = this.after.replace (comparisonAfter);
 
 				if (!success) {
-					// TODO: Handle error
+					Log.throwException (new Exception (), this.getClass ());
+					// TODO: Handle error better than this
 				}
 
 				// Set the time to the actual time. synchronize() will then process all the
