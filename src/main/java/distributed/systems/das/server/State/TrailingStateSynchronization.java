@@ -1,6 +1,7 @@
-package distributed.systems.das.server.events;
+package distributed.systems.das.server.State;
 
-import distributed.systems.das.server.GameState;
+import distributed.systems.das.server.events.Event;
+import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;

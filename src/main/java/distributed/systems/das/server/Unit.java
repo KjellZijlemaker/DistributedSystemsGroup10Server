@@ -1,5 +1,7 @@
 package distributed.systems.das.server;
 
+import distributed.systems.das.server.State.BattleField;
+
 import java.io.Serializable;
 
 /**
