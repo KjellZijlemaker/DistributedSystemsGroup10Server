@@ -11,7 +11,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class EventList implements Iterable<Event>, Serializable {
 
-	private CopyOnWriteArrayList<Event> events = new CopyOnWriteArrayList<> ();
+	private CopyOnWriteArrayList<Event> events;
+
+	/**
+	 * Creates new EventList
+	 */
+	public EventList () {
+		this.events = new CopyOnWriteArrayList<> ();
+	}
+
+	/**
+	 * Creates new EventList by cloning an already existing one
+	 */
+	public EventList (EventList toCopy) {
+		this.events = new CopyOnWriteArrayList<> (toCopy.getEvents ());
+	}
 
 	public synchronized boolean add (Event event) {
 		return this.events.add (event);
@@ -95,5 +109,4 @@ public class EventList implements Iterable<Event>, Serializable {
 
 		return x.equals (y);
 	}
-
 }
