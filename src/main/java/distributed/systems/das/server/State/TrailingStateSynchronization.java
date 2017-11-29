@@ -54,6 +54,13 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
 		}
+
+		try {
+			start ();
+		} catch (AlreadyRunningException e) {
+			Log.throwException (e, this.getClass ());
+			e.printStackTrace ();
+		}
 	}
 
 	private synchronized void start () throws AlreadyRunningException {
