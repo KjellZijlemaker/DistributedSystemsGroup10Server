@@ -12,8 +12,8 @@ public class Heal extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	public Heal (long id, long timestamp, int actor_id,
-				 int targetX, int targetY, int amount) {
+	private Heal (long id, long timestamp, int actor_id,
+				  int targetX, int targetY, int amount) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
 		this.targetY = targetY;
