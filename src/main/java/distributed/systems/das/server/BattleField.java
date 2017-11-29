@@ -282,4 +282,26 @@ public class BattleField implements IMessageReceivedHandler {
         }
     }
 
+	@Override
+	public boolean equals (Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (this.getClass () != obj.getClass ()) {
+			return false;
+		}
+		BattleField battleField = (BattleField) obj;
+		for (int x = 0; x < MAP_WIDTH; ++x) {
+			for (int y = 0; y < MAP_HEIGHT; ++y) {
+				if (map[x][y] == battleField.getUnit (x, y)) {
+					return false;
+				}
+			}
+		}
+	
+		return true;
+	}
+
+
 }
