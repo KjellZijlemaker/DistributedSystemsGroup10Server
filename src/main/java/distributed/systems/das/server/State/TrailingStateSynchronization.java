@@ -29,12 +29,14 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	 * @param delayInterval interval between the states. Must be divisible by {@code tickrate}
 	 * @param delays        number of delays
 	 * @param tickrate      rate at which time is updated
+	 * @param wishList        {@code WishList} object that will be subscribed to
 	 */
 	private TrailingStateSynchronization (GameState startingState, int delayInterval,
 										  int delays, int tickrate, WishList wishList) {
 
 		if (delayInterval % tickrate != 0) {
-			throw new IllegalArgumentException ("TSS delayInterval MUST be divisble by tickrate!");
+			throw new IllegalArgumentException ("TSS delayInterval MUST be divisible by " +
+												"tickrate!");
 		}
 
 		subscribeToNotifications (tickrate, wishList);
