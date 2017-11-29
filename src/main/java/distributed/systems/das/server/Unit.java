@@ -30,13 +30,9 @@ public abstract class Unit implements Serializable {
 		up, right, down, left
 	}
 
-	;
-
 	public enum UnitType {
 		player, dragon, undefined,
 	}
-
-	;
 
 	/**
 	 * Create a new unit and specify the
@@ -176,5 +172,19 @@ public abstract class Unit implements Serializable {
 
 	protected void moveUnit (int x, int y) {
 		// TODO: might need this
+	}
+
+	@Override
+	public boolean equals (Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (this.getClass () != obj.getClass ()) {
+			return false;
+		}
+		Unit unit = (Unit) obj;
+		return (this.x == unit.getX ()) && (this.y == unit.getY ())
+				&& (this.unitID == unit.getUnitID ());
 	}
 }
