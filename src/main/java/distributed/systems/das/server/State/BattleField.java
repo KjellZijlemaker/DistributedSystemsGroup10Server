@@ -32,11 +32,31 @@ public class BattleField implements IMessageReceivedHandler {
      */
     private BattleField (int width, int height) {
         synchronized (this) {
-            map = new Unit[width][height];
-            units = new ArrayList<Unit>();
-        }
-
+			this.map = new Unit[width][height];
+			this.units = new ArrayList<Unit> ();
+		}
     }
+
+	private BattleField (int width, int height, Unit[][] map, ArrayList<Unit> units, int
+			lastUnitID) {
+		synchronized (this) {
+			this.map = new Unit[width][height];
+			for (int x = 0; x < width; ++x) {
+				System.arraycopy (map[x], 0, this.map[x], 0, height);
+			}
+			this.units = new ArrayList<Unit> (units);
+			this.lastUnitID = lastUnitID;
+		}
+	}
+
+	public static BattleField clone (BattleField battleField) {
+		Unit[][] map = battleField.getMap ();
+		return new BattleField (map.length,
+								map[0].length,
+								map,
+								battleField.getUnits (),
+								battleField.getLastUnitID ());
+	}
 
     /**
      * Singleton method which returns the sole
@@ -159,6 +179,10 @@ public class BattleField implements IMessageReceivedHandler {
         map[x][y] = null;
         units.remove(unitToRemove);
     }
+
+	public int getLastUnitID () {
+		return this.lastUnitID;
+	}
 
     /**
      * Returns a new unique unit ID.
@@ -304,5 +328,19 @@ public class BattleField implements IMessageReceivedHandler {
 		return true;
 	}
 
+	public Unit[][] getMap () {
+		return map;
+	}
 
+	public void setMap (Unit[][] map) {
+		this.map = map;
+	}
+
+	public ArrayList<Unit> getUnits () {
+		return units;
+	}
+
+	public void setUnits (ArrayList<Unit> units) {
+		this.units = units;
+	}
 }
