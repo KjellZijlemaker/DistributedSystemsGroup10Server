@@ -332,7 +332,7 @@ public class BattleField implements IMessageReceivedHandler {
 		return map;
 	}
 
-	public void setMap (Unit[][] map) {
+	public synchronized void setMap (Unit[][] map) {
 		this.map = map;
 	}
 
@@ -340,7 +340,7 @@ public class BattleField implements IMessageReceivedHandler {
 		return units;
 	}
 
-	public void setUnits (ArrayList<Unit> units) {
+	public synchronized void setUnits (ArrayList<Unit> units) {
 		this.units = units;
 	}
 }
