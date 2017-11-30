@@ -16,17 +16,21 @@ public class Core {
 
         EventList eventList = new EventList();
         GameState localGameState = new GameState(Integer.toUnsignedLong(1),eventList);
-        new TrailingStateSynchronization.TSSBuilder(localGameState);
-
+        WishList wishList = new WishList(battlefield);
+        TrailingStateSynchronization tss =
+                new TrailingStateSynchronization.TSSBuilder (localGameState)
+                        .setDelayInterval (100)
+                        .setDelays (3)
+                        .setWishList (wishList)
+                        .setTickrate (20)
+                        .createTSS ();
         if(GameState.getRunningState()){
             LocateRegistry.createRegistry(5001);
-            WishList wishList = new WishList(battlefield);
             Naming.rebind("//localhost:5001/wishes", wishList);
             new Thread(wishList, "wishes").start();
         }
 
-
-
+        
 
 //        Namingg.rebind("//:5001/battlefield", BattleField);
 
