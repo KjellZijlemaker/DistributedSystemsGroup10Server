@@ -5,11 +5,14 @@ import distributed.systems.das.server.events.Attack;
 import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Move;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BattleField {
+public class BattleField implements Serializable {
 	/* The array of units */
     private Unit[][] map;
+
+    private static final long serialVersionUID = 1L;
 
     /* The static singleton */
     private static BattleField battlefield;

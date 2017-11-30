@@ -4,6 +4,8 @@ import distributed.systems.das.server.Beans.User;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
+import distributed.systems.das.server.State.BattleField;
+import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.events.Event;
 import org.javatuples.Pair;
 
@@ -17,16 +19,17 @@ import java.util.*;
  */
 public class WishList extends UnicastRemoteObject implements RMIUserInterface, Runnable {
     private static final long serialVersionUID = 1L;
-    private List<Pair> userObjectList = new ArrayList<>();
+    private static List<Pair> userObjectList = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
+    private BattleField battlefield;
 
-
-    public WishList() throws RemoteException {
+    public WishList(BattleField battleField) throws RemoteException {
         super();
+        this.battlefield = battleField;
     }
 
     @Override
-    public String connectUser(Pair userObject) throws RemoteException {
+    public Pair<Boolean, BattleField> connectUser(Pair userObject) throws RemoteException {
         User newUser = (User) userObject.getValue0();
 
         if(newUser.getUserID().isEmpty()) {
@@ -35,9 +38,33 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
 
         System.out.println("Player: " + newUser.getUserID() + " connected");
         if (userObjectList.add(userObject)) {
-            return "OK";
+            this.battlefield = BattleField.getBattleField();
+
+            /* Once again, pick a random spot */
+
+            int x, y, attempt = 0;
+
+            do {
+                x = (int)(Math.random() * BattleField.MAP_WIDTH);
+                y = (int)(Math.random() * BattleField.MAP_HEIGHT);
+                attempt++;
+            } while (battlefield.getUnit(x, y) != null && attempt < 10);
+
+            // If we didn't find an empty spot, we won't add a new player
+            if (battlefield.getUnit(x, y) != null){
+                return null;
+            }
+            final int finalX = x;
+            final int finalY = y;
+            System.out.println(x + y);
+
+            //TODO: Add user to battlefield before sending back the updated one
+            
+            Pair<Boolean, BattleField> s = Pair.with(GameState.getRunningState(), BattleField.getBattleField());
+
+            return s;
         }
-        return "Already connected";
+        return null;
     }
 
     @Override
@@ -96,6 +123,10 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
 
     public void registerListener(IMessageReceivedHandler handler) {
         listeners.add(handler);
+    }
+
+    public static List<Pair> getUserObjectList(){
+        return userObjectList;
     }
 
 }
