@@ -65,48 +65,54 @@ public class Heal extends Event {
 			return targetX;
 		}
 
-		public void setTargetX (int targetX) {
+		public HealBuilder setTargetX (int targetX) {
 			this.targetX = targetX;
+			return this;
 		}
 
 		public int getTargetY () {
 			return targetY;
 		}
 
-		public void setTargetY (int targetY) {
+		public HealBuilder setTargetY (int targetY) {
 			this.targetY = targetY;
+			return this;
 		}
 
 		public long getId () {
 			return id;
 		}
 
-		public void setId (long id) {
+		public HealBuilder setId (long id) {
 			this.id = id;
+			return this;
 		}
 
 		public long getTimestamp () {
 			return timestamp;
 		}
 
-		public void setTimestamp (long timestamp) {
+		public HealBuilder setTimestamp (long timestamp) {
 			this.timestamp = timestamp;
+			return this;
 		}
 
 		public int getActor_id () {
 			return actor_id;
 		}
 
-		public void setActor_id (int actor_id) {
+		public HealBuilder setActor_id (int actor_id) {
 			this.actor_id = actor_id;
+			return this;
 		}
 
 		public int getAmount () {
 			return amount;
 		}
 
-		public void setAmount (int amount) {
+		public HealBuilder setAmount (int amount) {
 			this.amount = amount;
+			return this;
 		}
 
 		public Heal createEvent () {

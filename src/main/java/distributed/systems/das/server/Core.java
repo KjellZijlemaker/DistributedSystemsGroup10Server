@@ -14,9 +14,15 @@ public class Core {
         EventList eventList = new EventList();
         LocateRegistry.createRegistry(5001);
         GameState localGameState = new GameState(Integer.toUnsignedLong(1),eventList);
-        new TrailingStateSynchronization.TSSBuilder(localGameState);
-
         WishList wishList = new WishList();
+        TrailingStateSynchronization tss =
+                new TrailingStateSynchronization.TSSBuilder (localGameState)
+                        .setDelayInterval (100)
+                        .setDelays (3)
+                        .setWishList (wishList)
+                        .setTickrate (20)
+                        .createTSS ();
+
         Naming.rebind("//localhost:5001/wishes", wishList);
         wishList.run();
 

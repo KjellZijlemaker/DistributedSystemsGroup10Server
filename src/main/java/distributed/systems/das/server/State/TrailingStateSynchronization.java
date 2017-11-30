@@ -236,32 +236,36 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			return delayInterval;
 		}
 
-		public void setDelayInterval (int delayInterval) {
+		public TSSBuilder setDelayInterval (int delayInterval) {
 			this.delayInterval = delayInterval;
+			return this;
 		}
 
 		public int getDelays () {
 			return delays;
 		}
 
-		public void setDelays (int delays) {
+		public TSSBuilder setDelays (int delays) {
 			this.delays = delays;
+			return this;
 		}
 
 		public int getTickrate () {
 			return tickrate;
 		}
 
-		public void setTickrate (int tickrate) {
+		public TSSBuilder setTickrate (int tickrate) {
 			this.tickrate = tickrate;
+			return this;
 		}
 
 		public WishList getWishList () {
 			return wishList;
 		}
 
-		public void setWishList (WishList wishList) {
+		public TSSBuilder setWishList (WishList wishList) {
 			this.wishList = wishList;
+			return this;
 		}
 
 		public TrailingStateSynchronization createTSS () {
