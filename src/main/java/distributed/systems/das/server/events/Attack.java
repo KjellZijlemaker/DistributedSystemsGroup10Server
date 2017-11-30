@@ -58,48 +58,54 @@ public class Attack extends Event {
 			return targetX;
 		}
 
-		public void setTargetX (int targetX) {
+		public AttackBuilder setTargetX (int targetX) {
 			this.targetX = targetX;
+			return this;
 		}
 
 		public int getTargetY () {
 			return targetY;
 		}
 
-		public void setTargetY (int targetY) {
+		public AttackBuilder setTargetY (int targetY) {
 			this.targetY = targetY;
+			return this;
 		}
 
 		public long getId () {
 			return id;
 		}
 
-		public void setId (long id) {
+		public AttackBuilder setId (long id) {
 			this.id = id;
+			return this;
 		}
 
 		public long getTimestamp () {
 			return timestamp;
 		}
 
-		public void setTimestamp (long timestamp) {
+		public AttackBuilder setTimestamp (long timestamp) {
 			this.timestamp = timestamp;
+			return this;
 		}
 
 		public int getActor_id () {
 			return actor_id;
 		}
 
-		public void setActor_id (int actor_id) {
+		public AttackBuilder setActor_id (int actor_id) {
 			this.actor_id = actor_id;
+			return this;
 		}
 
 		public int getDamage () {
 			return damage;
 		}
 
-		public void setDamage (int damage) {
+		public AttackBuilder setDamage (int damage) {
 			this.damage = damage;
+			return this;
 		}
 
 		public Attack createEvent () {
