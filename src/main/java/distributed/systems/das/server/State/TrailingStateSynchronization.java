@@ -137,7 +137,8 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		}
 		if (!running) {
 			this.running = true;
-			thread.start ();
+			this.thread = new Thread();
+			this.thread.start ();
 		}
 	}
 
