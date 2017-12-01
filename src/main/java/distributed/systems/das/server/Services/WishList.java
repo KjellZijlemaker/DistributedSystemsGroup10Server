@@ -6,8 +6,11 @@ import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
+import distributed.systems.das.server.Units.Player;
+import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Event;
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -19,7 +22,8 @@ import java.util.*;
  */
 public class WishList extends UnicastRemoteObject implements RMIUserInterface, Runnable {
     private static final long serialVersionUID = 1L;
-    private static List<Pair> userObjectList = new ArrayList<>();
+    private static List<Triplet> userObjectList = new ArrayList<>();
+    private static ArrayList<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
     private BattleField battlefield;
 
@@ -29,10 +33,11 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
     }
 
     @Override
-    public Pair<Boolean, BattleField> connectUser(Pair userObject) throws RemoteException {
+    public Triplet<Boolean, BattleField, Player> connectUser(Triplet userObject) throws RemoteException {
         User newUser = (User) userObject.getValue0();
+        Player remotePlayer = (Player) userObject.getValue2();
 
-        if(newUser.getUserID().isEmpty()) {
+        if (newUser.getUserID().isEmpty()) {
             return null;
         }
 
@@ -45,35 +50,41 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
             int x, y, attempt = 0;
 
             do {
-                x = (int)(Math.random() * BattleField.MAP_WIDTH);
-                y = (int)(Math.random() * BattleField.MAP_HEIGHT);
+                x = (int) (Math.random() * BattleField.MAP_WIDTH);
+                y = (int) (Math.random() * BattleField.MAP_HEIGHT);
                 attempt++;
             } while (battlefield.getUnit(x, y) != null && attempt < 10);
 
             // If we didn't find an empty spot, we won't add a new player
-            if (battlefield.getUnit(x, y) != null){
+            if (battlefield.getUnit(x, y) != null) {
                 return null;
             }
             final int finalX = x;
             final int finalY = y;
-            System.out.println(x + y);
+            System.out.println("X is:" + finalX + "and y is: " + finalY);
 
-            //TODO: Add user to battlefield before sending back the updated one
-            
-            Pair<Boolean, BattleField> s = Pair.with(GameState.getRunningState(), BattleField.getBattleField());
+            remotePlayer.setPosition(finalX, finalY);
+            remotePlayer.setPlayerID(newUser.getUserID());
+            players.add(remotePlayer);
 
+            // Send back initial update to player
+            Triplet<Boolean, BattleField, Player> s = Triplet.with(GameState.getRunningState(), BattleField.getBattleField(), remotePlayer);
+            battlefield.setUnits(players);
+            System.out.println(battlefield.getUnits());
             return s;
         }
         return null;
     }
 
     @Override
-    public void disconnectUser(Pair userObject) throws RemoteException {
+    public void disconnectUser(Triplet userObject) throws RemoteException {
         User user = (User) userObject.getValue0();
-        if(userObjectList.remove(userObject)){
+        Player player = (Player) userObject.getValue2();
+        if (userObjectList.remove(userObject) && players.remove(player)) {
+            battlefield.setUnits(players);
             System.out.println("User: " + user.getUserID() + " removed");
-        }
-        else{
+            System.out.println(battlefield.getUnits());
+        } else {
             System.out.println("Failed to disconnect");
         }
 
@@ -95,7 +106,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
     @Override
     public void run() {
         while (true) {
-            for(int i = 0; i < userObjectList.size(); i++){
+            for (int i = 0; i < userObjectList.size(); i++) {
 
                 RMISendToUserInterface client = (RMISendToUserInterface) userObjectList.get(i).getValue1();
                 try {
@@ -119,14 +130,14 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
             } catch (InterruptedException iex) {
             }
         }
-        }
+    }
 
     public void registerListener(IMessageReceivedHandler handler) {
         listeners.add(handler);
     }
 
-    public static List<Pair> getUserObjectList(){
+    public static List<Triplet> getUserObjectList() {
         return userObjectList;
     }
-
 }
+

@@ -1,4 +1,4 @@
-package distributed.systems.das.server;
+package distributed.systems.das.server.Units;
 
 import distributed.systems.das.server.State.BattleField;
 

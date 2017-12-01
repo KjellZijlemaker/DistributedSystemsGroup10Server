@@ -1,6 +1,6 @@
 package distributed.systems.das.server.State;
 
-import distributed.systems.das.server.Unit;
+import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Attack;
 import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Move;
@@ -254,4 +254,5 @@ public class BattleField implements Serializable {
 	public synchronized void setUnits (ArrayList<Unit> units) {
 		this.units = units;
 	}
+
 }
