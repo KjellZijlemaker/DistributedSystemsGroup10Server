@@ -2,8 +2,6 @@ package distributed.systems.das.server.Units;
 
 public class Player extends Unit{
 
-    private String playerID;
-
     /**
      * Create a new unit and specify the
      * number of hitpoints. Units hitpoints
@@ -17,11 +15,4 @@ public class Player extends Unit{
         super(maxHealth, attackPoints);
     }
 
-    public void setPlayerID(String playerID) {
-        this.playerID = playerID;
-    }
-
-    public String getPlayerID(){
-        return this.playerID;
-    }
 }

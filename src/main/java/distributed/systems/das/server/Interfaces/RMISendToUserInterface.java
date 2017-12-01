@@ -1,7 +1,5 @@
 package distributed.systems.das.server.Interfaces;
 
-import distributed.systems.das.server.State.GameState;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

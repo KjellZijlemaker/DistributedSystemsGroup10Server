@@ -1,8 +1,7 @@
 package distributed.systems.das.server.Units;
 
-import distributed.systems.das.server.State.BattleField;
-
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Base class for all players whom can
@@ -26,7 +25,7 @@ public abstract class Unit implements Serializable {
 	protected int attackPoints;
 
 	// Identifier of the unit
-	private int unitID;
+	private String unitID;
 
 	public enum Direction {
 		up, right, down, left
@@ -52,7 +51,7 @@ public abstract class Unit implements Serializable {
 		this.attackPoints = attackPoints;
 
 		// Get a new unit id
-		unitID = BattleField.getBattleField ().getNewUnitID ();
+		unitID = UUID.randomUUID().toString();
 	}
 
 	/**
@@ -93,7 +92,7 @@ public abstract class Unit implements Serializable {
 	/**
 	 * @return the unique unit identifier.
 	 */
-	public int getUnitID () {
+	public String getUnitID () {
 		return unitID;
 	}
 
@@ -187,6 +186,6 @@ public abstract class Unit implements Serializable {
 		}
 		Unit unit = (Unit) obj;
 		return (this.x == unit.getX ()) && (this.y == unit.getY ())
-				&& (this.unitID == unit.getUnitID ());
+				&& (this.unitID.equals(unit.getUnitID ()));
 	}
 }

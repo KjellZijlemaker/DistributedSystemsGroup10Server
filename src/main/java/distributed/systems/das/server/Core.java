@@ -1,21 +1,16 @@
 package distributed.systems.das.server;
 
 import distributed.systems.das.server.Services.WishList;
-import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.State.TrailingStateSynchronization;
 import distributed.systems.das.server.events.EventList;
-import distributed.systems.das.server.util.Log;
 
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 
 public class Core {
-    private static BattleField battlefield;
 
     public static void main(String args[]) throws Exception {
-
-        new Log();
 
         EventList eventList = new EventList();
         GameState localGameState = new GameState(1,eventList);

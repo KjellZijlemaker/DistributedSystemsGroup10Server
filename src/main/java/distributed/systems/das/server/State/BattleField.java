@@ -84,7 +84,7 @@ public class BattleField implements Serializable {
      * @return true when the unit has been put on the
      * specified position.
      */
-    private boolean spawnUnit(Unit unit, int x, int y)
+    public boolean spawnUnit(Unit unit, int x, int y)
     {
         synchronized (this) {
             if (map[x][y] != null)
@@ -110,7 +110,7 @@ public class BattleField implements Serializable {
      * @return true when the unit has been put on the
      * specified position.
      */
-    private synchronized boolean putUnit(Unit unit, int x, int y)
+    public synchronized boolean putUnit(Unit unit, int x, int y)
     {
         if (map[x][y] != null)
             return false;
@@ -135,6 +135,14 @@ public class BattleField implements Serializable {
         assert y >= 0 && x < map[0].length;
 
         return map[x][y];
+    }
+
+    public Unit getUnit(String unitID) {
+        return units.stream()
+                .filter(x -> x.getUnitID()
+                        .equals(unitID))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -185,14 +193,6 @@ public class BattleField implements Serializable {
 		return this.lastUnitID;
 	}
 
-    /**
-     * Returns a new unique unit ID.
-     * @return int: a new unique unit ID.
-     */
-    public synchronized int getNewUnitID() {
-        return ++lastUnitID;
-    }
-
     public void attack (Attack attack) {
         int x = attack.getTargetX ();
         int y = attack.getTargetY ();
@@ -235,7 +235,7 @@ public class BattleField implements Serializable {
 				}
 			}
 		}
-	
+
 		return true;
 	}
 
