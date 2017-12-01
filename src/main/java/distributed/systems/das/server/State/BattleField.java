@@ -172,7 +172,7 @@ public class BattleField implements Serializable {
      * @param x position.
      * @param y position.
      */
-    private synchronized void removeUnit(int x, int y)
+    public synchronized void removeUnit(int x, int y)
     {
         Unit unitToRemove = this.getUnit(x, y);
         if (unitToRemove == null)

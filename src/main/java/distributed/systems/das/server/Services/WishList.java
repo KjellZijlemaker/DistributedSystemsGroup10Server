@@ -1,6 +1,5 @@
 package distributed.systems.das.server.Services;
 
-import distributed.systems.das.server.Beans.User;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
@@ -14,13 +13,14 @@ import org.javatuples.Triplet;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The wishlist will get a pair of User/RMISendToUserInterface, because the RMI interface will control which users
  * have been connected/disconnected. The User class can be used for security, playerID, nickname etc
  */
-public class WishList extends UnicastRemoteObject implements RMIUserInterface, Runnable {
+public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private static final long serialVersionUID = 1L;
     private static List<Pair> userObjectList = new ArrayList<>();
     private static ArrayList<Unit> players = new ArrayList<>();
@@ -80,7 +80,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
     public void disconnectUser(Pair userObject) throws RemoteException {
         Player player = (Player) userObject.getValue0();
         if (userObjectList.remove(userObject) && players.remove(player)) {
-            battlefield.setUnits(players);
+            battlefield.removeUnit(player.getX(), player.getY());
             System.out.println("User: " + player.getPlayerID() + " removed");
             System.out.println(battlefield.getUnits());
         } else {
@@ -98,35 +98,21 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
         return "OK";
     }
 
+    public void updateClients() {
+        for (Pair userObject : userObjectList) {
 
-    /**
-     * Send back message
-     */
-    @Override
-    public void run() {
-        while (true) {
-            for (int i = 0; i < userObjectList.size(); i++) {
-
-                RMISendToUserInterface client = (RMISendToUserInterface) userObjectList.get(i).getValue1();
-                try {
-                    client.update("Update to client");
-                } catch (RemoteException ex) {
-                    try {
-                        disconnectUser(userObjectList.get(i));
-                        //System.out.println("list is now at size: " + this.wishList.size());
-                    } catch (RemoteException rex) {
-                        System.err.println("Big trouble.");
-                        rex.printStackTrace();
-                        System.exit(3);
-                    }
-                }
-            }
-
-
-            // sleep for two seconds
+            RMISendToUserInterface client = (RMISendToUserInterface) userObject.getValue1();
             try {
-                Thread.sleep(2000);
-            } catch (InterruptedException iex) {
+                client.update("Update to client");
+            } catch (RemoteException ex) {
+                try {
+                    disconnectUser(userObject);
+                    //System.out.println("list is now at size: " + this.wishList.size());
+                } catch (RemoteException rex) {
+                    System.err.println("Big trouble.");
+                    rex.printStackTrace();
+                    System.exit(3);
+                }
             }
         }
     }
