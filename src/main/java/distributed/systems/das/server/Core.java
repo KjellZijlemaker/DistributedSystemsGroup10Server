@@ -16,7 +16,7 @@ public class Core {
 
         EventList eventList = new EventList();
         GameState localGameState = new GameState(Integer.toUnsignedLong(1),eventList);
-        WishList wishList = new WishList(battlefield);
+        WishList wishList = new WishList(localGameState.getBattleField());
         TrailingStateSynchronization tss =
                 new TrailingStateSynchronization.TSSBuilder (localGameState)
                         .setDelayInterval (100)
@@ -30,7 +30,8 @@ public class Core {
             new Thread(wishList, "wishes").start();
         }
 
-        
+        System.out.println("test");
+
 
 //        Namingg.rebind("//:5001/battlefield", BattleField);
 

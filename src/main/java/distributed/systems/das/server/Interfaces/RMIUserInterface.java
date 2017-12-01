@@ -14,7 +14,7 @@ import java.rmi.RemoteException;
  * The interface will force the implementation of the given methods below
  */
 public interface RMIUserInterface extends Remote {
-    Triplet<Boolean, BattleField, Player> connectUser(Triplet userObjectPair) throws RemoteException;
-    void disconnectUser(Triplet userObjectPair) throws RemoteException;
+    Triplet<Boolean, BattleField, Player> connectUser(Pair userObjectPair) throws RemoteException;
+    void disconnectUser(Pair userObjectPair) throws RemoteException;
     String registerWish(Pair userObject, Event event) throws RemoteException;
 }

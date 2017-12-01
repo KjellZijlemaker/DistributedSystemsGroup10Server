@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class WishList extends UnicastRemoteObject implements RMIUserInterface, Runnable {
     private static final long serialVersionUID = 1L;
-    private static List<Triplet> userObjectList = new ArrayList<>();
+    private static List<Pair> userObjectList = new ArrayList<>();
     private static ArrayList<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
     private BattleField battlefield;
@@ -33,15 +33,14 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
     }
 
     @Override
-    public Triplet<Boolean, BattleField, Player> connectUser(Triplet userObject) throws RemoteException {
-        User newUser = (User) userObject.getValue0();
-        Player remotePlayer = (Player) userObject.getValue2();
+    public Triplet<Boolean, BattleField, Player> connectUser(Pair userObject) throws RemoteException {
+        Player remotePlayer = (Player) userObject.getValue0();
 
-        if (newUser.getUserID().isEmpty()) {
+        if (remotePlayer.getPlayerID().isEmpty()) {
             return null;
         }
 
-        System.out.println("Player: " + newUser.getUserID() + " connected");
+        System.out.println("Player: " + remotePlayer.getPlayerID() + " connected");
         if (userObjectList.add(userObject)) {
             this.battlefield = BattleField.getBattleField();
 
@@ -64,7 +63,6 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
             System.out.println("X is:" + finalX + "and y is: " + finalY);
 
             remotePlayer.setPosition(finalX, finalY);
-            remotePlayer.setPlayerID(newUser.getUserID());
             players.add(remotePlayer);
 
             // Send back initial update to player
@@ -77,12 +75,11 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
     }
 
     @Override
-    public void disconnectUser(Triplet userObject) throws RemoteException {
-        User user = (User) userObject.getValue0();
-        Player player = (Player) userObject.getValue2();
+    public void disconnectUser(Pair userObject) throws RemoteException {
+        Player player = (Player) userObject.getValue0();
         if (userObjectList.remove(userObject) && players.remove(player)) {
             battlefield.setUnits(players);
-            System.out.println("User: " + user.getUserID() + " removed");
+            System.out.println("User: " + player.getPlayerID() + " removed");
             System.out.println(battlefield.getUnits());
         } else {
             System.out.println("Failed to disconnect");
@@ -136,7 +133,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
         listeners.add(handler);
     }
 
-    public static List<Triplet> getUserObjectList() {
+    public static List<Pair> getUserObjectList() {
         return userObjectList;
     }
 }
