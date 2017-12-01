@@ -62,12 +62,14 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface, R
             final int finalY = y;
             System.out.println("X is:" + finalX + "and y is: " + finalY);
 
+            // Set position for player and add it to the battlefield
             remotePlayer.setPosition(finalX, finalY);
             players.add(remotePlayer);
+            battlefield.setUnits(players);
 
             // Send back initial update to player
             Triplet<Boolean, BattleField, Player> s = Triplet.with(GameState.getRunningState(), BattleField.getBattleField(), remotePlayer);
-            battlefield.setUnits(players);
+
             System.out.println(battlefield.getUnits());
             return s;
         }
