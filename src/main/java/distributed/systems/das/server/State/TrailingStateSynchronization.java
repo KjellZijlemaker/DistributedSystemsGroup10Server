@@ -5,7 +5,6 @@ import distributed.systems.das.server.Services.WishList;
 import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.util.AlreadyRunningException;
-import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -52,7 +51,6 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		try {
 			start ();
 		} catch (AlreadyRunningException e) {
-			Log.throwException (e, this.getClass ());
 			e.printStackTrace ();
 		}
 	}
@@ -62,7 +60,6 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		try {
 			this.notify.start ();
 		} catch (AlreadyRunningException e) {
-			Log.throwException (e, this.getClass ());
 			// TODO: Handle this. Can probably just ignore, since it's already running.
 		}
 		this.notify.subscribe (this);
@@ -205,7 +202,6 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 				boolean success = this.after.replace (comparisonAfter);
 
 				if (!success) {
-					Log.throwException (new Exception (), this.getClass ());
 					// TODO: Handle error better than this
 				}
 

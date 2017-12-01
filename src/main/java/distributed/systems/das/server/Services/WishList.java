@@ -7,9 +7,10 @@ import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Event;
-import distributed.systems.das.server.util.Log;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -21,6 +22,8 @@ import java.util.*;
  */
 public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private static final long serialVersionUID = 1L;
+    static final Logger Log = LoggerFactory.getLogger(UnicastRemoteObject.class);
+
     private Map<String, RMISendToUserInterface> userCallbacks = new HashMap<>();
     private List<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
@@ -42,6 +45,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             return null;
         }
 
+        Log.info("User connected with ID "+remotePlayer.getUnitID());
         userCallbacks.put(remotePlayer.getUnitID(), callback);
         players.add(remotePlayer);
 
@@ -62,7 +66,6 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             return false;
         }
 
-        System.out.println("X is:" + x + "and y is: " + y);
         remotePlayer.setPosition(x, y);
         return true;
     }
@@ -72,8 +75,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
         players.remove(player);
         userCallbacks.remove(player.getUnitID());
         battlefield.removeUnit(player.getX(), player.getY());
-        System.out.println("disconnected");
-//      Log.serverUpdate("User: " + player.getUnitID() + " disconnected");
+        Log.info("User: " + player.getUnitID() + " disconnected");
 
     }
 
@@ -81,7 +83,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
         boolean exists = players.stream().anyMatch(x -> x.getUnitID()
                 .equals(player.getUnitID()));
         if (!exists) {
-//            Log.serverError("User: " + player.getUnitID() + " is not registered");
+            Log.warn("User: " + player.getUnitID() + " is not registered");
             return "You are not registered";
         }
         listeners.forEach(x -> x.onMessageReceived(event));
@@ -108,7 +110,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             try {
                 disconnectUser(remoteUser);
             } catch (RemoteException e) {
-                Log.serverError("Cannot disconnect User: " + unitID);
+                Log.warn("Cannot disconnect User: " + unitID);
                 e.printStackTrace();
             }
         }
