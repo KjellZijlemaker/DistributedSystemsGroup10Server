@@ -8,7 +8,7 @@ import distributed.systems.das.server.events.EventList;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 
-public class Core {
+public class ServerRunner {
 
     public static void main(String args[]) throws Exception {
 
@@ -26,12 +26,6 @@ public class Core {
 
         LocateRegistry.createRegistry(5001);
         Naming.rebind("//localhost:5001/wishes", wishList);
-
-        while (true) {
-            wishList.updateClients();
-            System.out.println(localGameState.getEventList().getEvents());
-            Thread.sleep(200);
-        }
 
     }
 

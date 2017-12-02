@@ -188,6 +188,7 @@ public class BattleField implements Serializable {
         Unit unit = this.getUnit(x, y);
         if (unit != null) {
             unit.adjustHitPoints(-attack.getDamage());
+            if (unit.isDead()) removeUnit(x, y);
         }
     }
 

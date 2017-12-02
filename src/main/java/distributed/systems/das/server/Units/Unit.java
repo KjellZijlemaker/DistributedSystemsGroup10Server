@@ -70,8 +70,10 @@ public abstract class Unit implements Serializable {
 		if (hitPoints > maxHitPoints)
 			hitPoints = maxHitPoints;
 
-		if (hitPoints <= 0)
-			removeUnit (x, y);
+	}
+
+	public boolean isDead() {
+		return hitPoints <= 0;
 	}
 
 	public void dealDamage (int x, int y, int damage) {

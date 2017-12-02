@@ -7,7 +7,6 @@ import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Event;
-import distributed.systems.das.server.events.EventList;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.slf4j.Logger;
@@ -15,7 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The wishlist will get a pair of User/RMISendToUserInterface, because the RMI interface will control which users
@@ -25,7 +28,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private static final long serialVersionUID = 1L;
     static final Logger Log = LoggerFactory.getLogger(WishList.class);
 
-    private Map<String, RMISendToUserInterface> userCallbacks = new HashMap<>();
+    private Map<String, RMISendToUserInterface> userCallbacks = new ConcurrentHashMap<>();
     private List<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
     private GameState localGameState;
@@ -46,7 +49,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             return null;
         }
 
-        Log.info("User connected with ID "+remotePlayer.getUnitID());
+        Log.info("User connected with ID " + remotePlayer.getUnitID());
         userCallbacks.put(remotePlayer.getUnitID(), callback);
         players.add(remotePlayer);
 
@@ -90,42 +93,29 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
         localGameState.getEventList().add(event);
         listeners.forEach(x -> x.onMessageReceived(event));
         Log.debug("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
+
+        updateClients(event);
         return "OK";
     }
 
-    public void updateClients() {
+    public void updateClients(Event event) {
         List<String> brokenConnections = new ArrayList<>();
-        Map<String, RMISendToUserInterface> map = Collections.synchronizedMap(userCallbacks);
 
-        synchronized (map){
-            for (String unitID : map.keySet()) { // TODO concurrent modification exception if someone adds element while we are iterating
-                RMISendToUserInterface callback = userCallbacks.get(unitID);
-                try {
-                    callback.update(localGameState.getEventList());
-                        for(int i = 0; i < localGameState.getEventList().getEvents().size(); i++){
-                            if(localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)){
-                                System.out.println(localGameState.getEventList().getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
-                                localGameState.getEventList().getEvents().remove(i);
-
-                            }
-//                            if(events.getEvents().get(i).getActor_id() == localGameState.getEventList().getEvents().get(i).getActor_id()){
-//                                System.out.println(events.getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
-//
-//                                localGameState.getEventList().getEvents().remove(events.getEvents().get(i));
-//                            }
-                        }
-                } catch (RemoteException ex) {
-                    brokenConnections.add(unitID);
-
-                        for (int i = 0; i < localGameState.getEventList().getEvents().size(); i++) {
-                            if (localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)) {
-                                System.out.println(localGameState.getEventList().getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
-                                localGameState.getEventList().getEvents().remove(i);
-
-                            }
-                        }
-                }
-        }
+        for (String unitID : userCallbacks.keySet()) { // TODO concurrent modification exception if someone adds element while we are iterating
+            RMISendToUserInterface callback = userCallbacks.get(unitID);
+            try {
+                callback.update(event);
+            } catch (RemoteException ex) {
+                brokenConnections.add(unitID);
+            } finally {
+//                for (int i = 0; i < localGameState.getEventList().getEvents().size(); i++) {
+//                    if (localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)) {
+////                        System.out.println(localGameState.getEventList().getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
+//                        localGameState.getEventList().getEvents().remove(i);
+//                        i--;
+//                    }
+//                }
+            }
         }
 
         for (String unitID : brokenConnections) {
@@ -144,10 +134,6 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
 
     public void registerListener(IMessageReceivedHandler handler) {
         listeners.add(handler);
-    }
-
-    public static List<Pair> getUserObjectList() {
-        return Collections.emptyList();
     }
 
 }

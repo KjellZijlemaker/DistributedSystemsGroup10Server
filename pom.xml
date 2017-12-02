@@ -23,7 +23,7 @@
                     <finalName>server</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>distributed.systems.das.server.Core</mainClass>
+                            <mainClass>distributed.systems.das.server.ServerRunner</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
