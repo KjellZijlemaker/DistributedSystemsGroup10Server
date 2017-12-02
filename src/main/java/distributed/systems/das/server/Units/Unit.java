@@ -43,7 +43,7 @@ public abstract class Unit implements Serializable {
 	 * @param maxHealth is the maximum health of
 	 *                  this specific unit.
 	 */
-	public Unit (int maxHealth, int attackPoints) {
+	public Unit (int maxHealth, int attackPoints, String UUID) {
 		// Initialize the max health and health
 		hitPoints = maxHitPoints = maxHealth;
 
@@ -51,7 +51,7 @@ public abstract class Unit implements Serializable {
 		this.attackPoints = attackPoints;
 
 		// Get a new unit id
-		unitID = UUID.randomUUID().toString();
+		unitID = UUID;
 	}
 
 	/**

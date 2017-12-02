@@ -11,8 +11,8 @@ public class Player extends Unit{
      *                     this specific unit.
      * @param attackPoints
      */
-    public Player(int maxHealth, int attackPoints) {
-        super(maxHealth, attackPoints);
+    public Player(int maxHealth, int attackPoints, String playerID) {
+        super(maxHealth, attackPoints, playerID);
     }
 
 }
