@@ -12,7 +12,7 @@ public class Heal extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	private Heal (long id, long timestamp, int actor_id,
+	private Heal (long id, long timestamp, String actor_id,
 				  int targetX, int targetY, int amount) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
@@ -54,7 +54,7 @@ public class Heal extends Event {
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
-		private int actor_id;
+		private String actor_id;
 		private int amount;
 
 		public HealBuilder (long id) {
@@ -97,11 +97,11 @@ public class Heal extends Event {
 			return this;
 		}
 
-		public int getActor_id () {
+		public String getActor_id () {
 			return actor_id;
 		}
 
-		public HealBuilder setActor_id (int actor_id) {
+		public HealBuilder setActor_id (String actor_id) {
 			this.actor_id = actor_id;
 			return this;
 		}

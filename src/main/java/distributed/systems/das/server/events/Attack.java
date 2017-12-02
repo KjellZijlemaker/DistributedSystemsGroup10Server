@@ -5,7 +5,7 @@ public class Attack extends Event {
 	private int targetX, targetY;
 	private int damage;
 
-	private Attack (long id, long timestamp, int actor_id,
+	private Attack (long id, long timestamp, String actor_id,
 					int targetX, int targetY, int damage) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
@@ -47,7 +47,7 @@ public class Attack extends Event {
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
-		private int actor_id;
+		private String actor_id;
 		private int damage;
 
 		public AttackBuilder (long id) {
@@ -90,11 +90,11 @@ public class Attack extends Event {
 			return this;
 		}
 
-		public int getActor_id () {
+		public String getActor_id () {
 			return actor_id;
 		}
 
-		public AttackBuilder setActor_id (int actor_id) {
+		public AttackBuilder setActor_id (String actor_id) {
 			this.actor_id = actor_id;
 			return this;
 		}

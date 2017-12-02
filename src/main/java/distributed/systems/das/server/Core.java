@@ -14,7 +14,8 @@ public class Core {
 
         EventList eventList = new EventList();
         GameState localGameState = new GameState(1,eventList);
-        WishList wishList = new WishList(localGameState.getBattleField(), localGameState);
+        WishList wishList = new WishList(localGameState.getBattleField());
+        wishList.registerListener(localGameState);
         TrailingStateSynchronization tss =
                 new TrailingStateSynchronization.TSSBuilder (localGameState)
                         .setDelayInterval (100)
@@ -23,15 +24,12 @@ public class Core {
                         .setTickrate (20)
                         .createTSS ();
 
-        tss.getState(1).getEventList();
         LocateRegistry.createRegistry(5001);
         Naming.rebind("//localhost:5001/wishes", wishList);
-        System.out.println("test");
 
         while (true) {
             wishList.updateClients();
-            Thread.sleep(1000);
-            System.out.println(localGameState.getEventList().getEvents());
+            Thread.sleep(2000);
         }
 
     }
