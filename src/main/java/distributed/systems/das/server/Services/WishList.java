@@ -28,12 +28,10 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private Map<String, RMISendToUserInterface> userCallbacks = new HashMap<>();
     private List<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
-    private BattleField battlefield;
     private GameState localGameState;
 
-    public WishList(BattleField battleField, GameState localGameState) throws RemoteException {
+    public WishList(GameState localGameState) throws RemoteException {
         super();
-        this.battlefield = battleField;
         this.localGameState = localGameState;
     }
 
@@ -62,9 +60,9 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             x = (int) (Math.random() * BattleField.MAP_WIDTH);
             y = (int) (Math.random() * BattleField.MAP_HEIGHT);
             attempt++;
-        } while (!battlefield.spawnUnit(remotePlayer, x, y) && attempt < 10);
+        } while (!localGameState.getBattleField().spawnUnit(remotePlayer, x, y) && attempt < 10);
 
-        if (!battlefield.getUnit(x, y).getUnitID()
+        if (!localGameState.getBattleField().getUnit(x, y).getUnitID()
                 .equals(remotePlayer.getUnitID())) {
             return false;
         }
@@ -77,7 +75,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     public void disconnectUser(Unit player) throws RemoteException {
         players.remove(player);
         userCallbacks.remove(player.getUnitID());
-        battlefield.removeUnit(player.getX(), player.getY());
+        localGameState.getBattleField().removeUnit(player.getX(), player.getY());
         Log.info("User: " + player.getUnitID() + " disconnected");
 
     }
@@ -105,7 +103,9 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
                 try {
                     callback.update(localGameState.getEventList());
                         for(int i = 0; i < localGameState.getEventList().getEvents().size(); i++){
-                            if(localGameState.getEventList().getEvents().get(i).getActor_id() == Integer.getInteger(unitID)){
+                            if(localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)){
+                                System.out.println(localGameState.getEventList().getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
+                                localGameState.getEventList().getEvents().remove(i);
 
                             }
 //                            if(events.getEvents().get(i).getActor_id() == localGameState.getEventList().getEvents().get(i).getActor_id()){
@@ -116,6 +116,14 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
                         }
                 } catch (RemoteException ex) {
                     brokenConnections.add(unitID);
+
+                        for (int i = 0; i < localGameState.getEventList().getEvents().size(); i++) {
+                            if (localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)) {
+                                System.out.println(localGameState.getEventList().getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
+                                localGameState.getEventList().getEvents().remove(i);
+
+                            }
+                        }
                 }
         }
         }
