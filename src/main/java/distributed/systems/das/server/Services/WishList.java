@@ -7,6 +7,7 @@ import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Event;
+import distributed.systems.das.server.events.EventList;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.slf4j.Logger;
@@ -28,10 +29,12 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private List<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
     private BattleField battlefield;
+    private GameState localGameState;
 
-    public WishList(BattleField battleField) throws RemoteException {
+    public WishList(BattleField battleField, GameState localGameState) throws RemoteException {
         super();
         this.battlefield = battleField;
+        this.localGameState = localGameState;
     }
 
     @Override
@@ -86,6 +89,7 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             Log.warn("User: " + player.getUnitID() + " is not registered");
             return "You are not registered";
         }
+        localGameState.getEventList().add(event);
         listeners.forEach(x -> x.onMessageReceived(event));
 //        Log.serverUpdate("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
         return "OK";
@@ -93,13 +97,27 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
 
     public void updateClients() {
         List<String> brokenConnections = new ArrayList<>();
-        for (String unitID : userCallbacks.keySet()) { // TODO concurrent modification exception if someone adds element while we are iterating
-            RMISendToUserInterface callback = userCallbacks.get(unitID);
-            try {
-                callback.update("Update to client");
-            } catch (RemoteException ex) {
-                brokenConnections.add(unitID);
-            }
+        Map<String, RMISendToUserInterface> map = Collections.synchronizedMap(userCallbacks);
+
+        synchronized (map){
+            for (String unitID : map.keySet()) { // TODO concurrent modification exception if someone adds element while we are iterating
+                RMISendToUserInterface callback = userCallbacks.get(unitID);
+                try {
+                    callback.update(localGameState.getEventList());
+                        for(int i = 0; i < localGameState.getEventList().getEvents().size(); i++){
+                            if(localGameState.getEventList().getEvents().get(i).getActor_id() == Integer.getInteger(unitID)){
+
+                            }
+//                            if(events.getEvents().get(i).getActor_id() == localGameState.getEventList().getEvents().get(i).getActor_id()){
+//                                System.out.println(events.getEvents().get(i).getActor_id() + ", " + localGameState.getEventList().getEvents().get(i).getActor_id());
+//
+//                                localGameState.getEventList().getEvents().remove(events.getEvents().get(i));
+//                            }
+                        }
+                } catch (RemoteException ex) {
+                    brokenConnections.add(unitID);
+                }
+        }
         }
 
         for (String unitID : brokenConnections) {
