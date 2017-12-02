@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class WishList extends UnicastRemoteObject implements RMIUserInterface {
     private static final long serialVersionUID = 1L;
-    static final Logger Log = LoggerFactory.getLogger(UnicastRemoteObject.class);
+    static final Logger Log = LoggerFactory.getLogger(WishList.class);
 
     private Map<String, RMISendToUserInterface> userCallbacks = new HashMap<>();
     private List<Unit> players = new ArrayList<>();
@@ -83,11 +83,11 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
         boolean exists = players.stream().anyMatch(x -> x.getUnitID()
                 .equals(player.getUnitID()));
         if (!exists) {
-            Log.warn("User: " + player.getUnitID() + " is not registered");
+            Log.debug("User: " + player.getUnitID() + " is not registered");
             return "You are not registered";
         }
         listeners.forEach(x -> x.onMessageReceived(event));
-//        Log.serverUpdate("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
+        Log.debug("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
         return "OK";
     }
 

@@ -15,6 +15,7 @@ public class Core {
         EventList eventList = new EventList();
         GameState localGameState = new GameState(1,eventList);
         WishList wishList = new WishList(localGameState.getBattleField());
+        wishList.registerListener(localGameState);
         TrailingStateSynchronization tss =
                 new TrailingStateSynchronization.TSSBuilder (localGameState)
                         .setDelayInterval (100)
@@ -25,7 +26,6 @@ public class Core {
 
         LocateRegistry.createRegistry(5001);
         Naming.rebind("//localhost:5001/wishes", wishList);
-        System.out.println("test");
 
         while (true) {
             wishList.updateClients();

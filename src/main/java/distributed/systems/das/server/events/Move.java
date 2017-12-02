@@ -14,7 +14,7 @@ public class Move extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	private Move (long id, long timestamp, int actor_id,
+	private Move (long id, long timestamp, String actor_id,
 				  int targetX, int targetY) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
@@ -47,7 +47,7 @@ public class Move extends Event {
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
-		private int actor_id;
+		private String actor_id;
 
 		public MoveBuilder (long id) {
 			this.id = id;
@@ -89,17 +89,17 @@ public class Move extends Event {
 			return this;
 		}
 
-		public int getActor_id () {
+		public String getActor_id () {
 			return actor_id;
 		}
 
-		public MoveBuilder setActor_id (int actor_id) {
+		public MoveBuilder setActor_id (String actor_id) {
 			this.actor_id = actor_id;
 			return this;
 		}
 
 		public Move createEvent () {
-			return new Move (id, timestamp, actor_id, targetX, targetY);
+			return new Move(id, timestamp, actor_id, targetX, targetY);
 		}
 	}
 }

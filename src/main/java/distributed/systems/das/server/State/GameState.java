@@ -1,5 +1,6 @@
 package distributed.systems.das.server.State;
 
+import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.events.*;
 
 /**
@@ -9,7 +10,7 @@ import distributed.systems.das.server.events.*;
  *
  * @author Pieter Anemaet, Boaz Pat-El
  */
-public class GameState {
+public class GameState implements IMessageReceivedHandler{
 	// Is-the-program-actually-running-flag
 	private static volatile boolean running = true;
 	// Relation between game time and real time
@@ -179,4 +180,8 @@ public class GameState {
 		playerCount = players;
 	}
 
+	@Override
+	public void onMessageReceived(Event event) {
+		execute(event);
+	}
 }
