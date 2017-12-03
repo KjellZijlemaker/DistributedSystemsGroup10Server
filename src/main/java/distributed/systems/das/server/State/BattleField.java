@@ -3,6 +3,7 @@ package distributed.systems.das.server.State;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Attack;
 import distributed.systems.das.server.events.Heal;
+import distributed.systems.das.server.events.Message;
 import distributed.systems.das.server.events.Move;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,29 +183,34 @@ public class BattleField implements Serializable {
         Log.debug("removeUnit "+unitToRemove.getUnitID()+ " from "+x+" "+y);
     }
 
-    public void attack(Attack attack) {
-        int x = attack.getTargetX();
-        int y = attack.getTargetY();
+    public void removeUnit(String unitID) {
+        Unit u = getUnit(unitID);
+        removeUnit(u.getX(), u.getY());
+    }
+
+    public void attack(Message message) {
+        int x = (Integer) message.body.get("x");
+        int y = (Integer) message.body.get("y");
         Unit unit = this.getUnit(x, y);
         if (unit != null) {
-            unit.adjustHitPoints(-attack.getDamage());
+            unit.adjustHitPoints(-(Integer) message.body.get("damage"));
             if (unit.isDead()) removeUnit(x, y);
         }
     }
 
-    public void heal(Heal heal) {
-        int x = heal.getTargetX();
-        int y = heal.getTargetY();
+    public void heal(Message message) {
+        int x = (Integer) message.body.get("x");
+        int y = (Integer) message.body.get("y");
         Unit unit = this.getUnit(x, y);
         if (unit != null) {
-            unit.adjustHitPoints(heal.getAmount());
+            unit.adjustHitPoints((Integer) message.body.get("healed"));
         }
     }
 
-    public void move(Move move) {
-        int x = move.getTargetX();
-        int y = move.getTargetY();
-        Unit unit = getUnit(move.getActor_id());
+    public void move(Message message) {
+        int x = (Integer) message.body.get("x");
+        int y = (Integer) message.body.get("y");
+        Unit unit = getUnit(message.actorID);
         moveUnit(unit, x, y);
     }
 

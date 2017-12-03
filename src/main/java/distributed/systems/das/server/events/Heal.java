@@ -1,7 +1,7 @@
 package distributed.systems.das.server.events;
 
 public class Heal extends Event {
-
+	private static long serialVersionUID = 1L;
 	private int targetX, targetY;
 	private int amount;
 

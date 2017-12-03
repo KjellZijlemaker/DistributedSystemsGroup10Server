@@ -12,6 +12,9 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	public static final int ATTACK = 1;
 	public static final int HEAL = 2;
 	public static final int MOVE = 3;
+	public static final int HEARTBEAT = 4;
+	public static final int LOGIN = 5;
+
 
 	private long id;
 	private long timestamp;

@@ -1,17 +1,24 @@
 package distributed.systems.das.server;
 
+import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.Services.Callback;
 import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.Units.Player;
 import distributed.systems.das.server.Units.Unit;
-import distributed.systems.das.server.events.Move;
+import distributed.systems.das.server.events.*;
 import org.javatuples.Triplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -20,7 +27,13 @@ import java.util.UUID;
  * Here we can call the remote objects through the implemented interfaces. Please look in the method body for more
  * explanation
  */
-public class ClientRunner {
+public class ClientRunner extends UnicastRemoteObject implements IMessageReceivedHandler {
+
+    static final Logger Log = LoggerFactory.getLogger(ClientRunner.class);
+
+    protected ClientRunner() throws RemoteException {
+        super();
+    }
 
     public static void main(String[] args) throws MalformedURLException, RemoteException, NotBoundException, InterruptedException {
         long currentTime = System.currentTimeMillis();
@@ -49,48 +62,59 @@ public class ClientRunner {
         Unit localPlayer = new Player(10, 10, playerID);
 
 
-        /**
-         * Connect to the server and receive updates from server + send dummy movements to server
-         */
         Callback updateClient = new Callback();
         try {
 
-            String serverName = "//localhost:5001/wishes";
-            RMIUserInterface user = (RMIUserInterface) Naming.lookup(serverName);
-            Triplet<Boolean, BattleField, Unit> initialStateBattlefield = user.connectUser(localPlayer, updateClient);
+            ClientRunner runner = new ClientRunner();
+            String serverID = "123";
+            Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
+            System.out.println(Arrays.toString(remoteRegistry.list()));
+            IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
+            remoteRegistry.bind(playerID, runner);
+
+            Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
+            server.onMessageReceived(m);
+
+            m = new Message(1, System.currentTimeMillis(), playerID, Message.MOVE);
+            m.body.put("x", 1);
+            m.body.put("y", 1);
+            server.onMessageReceived(m);
+
+            m = new Message(2, System.currentTimeMillis(), playerID, Message.HEARTBEAT);
+            server.onMessageReceived(m);
 
             // Get values from server
-            boolean gameState = initialStateBattlefield.getValue0();
-            BattleField localBattlefield = initialStateBattlefield.getValue1();
-            localPlayer = initialStateBattlefield.getValue2(); // Update local player from server
-
-            // If game is running:
-            if (gameState) {
-//                System.out.println(localBattlefield.getUnits());
-                System.out.println(localPlayer.getUnitID());
-                System.out.println(localBattlefield.getMap());
-            }
-
-            while (System.currentTimeMillis() < end) {
-                Thread.sleep(1000);
-
-                for (int i = 0; i < localBattlefield.getUnits().size(); i++) {
-                    System.out.println(localBattlefield.getUnits().get(i).getX());
-                    System.out.println(localBattlefield.getUnits().get(i).getY());
-                }
-                String returnMessage = user.registerWish(localPlayer, new Move.MoveBuilder(1)
-                        .setActor_id(localPlayer.getUnitID())
-                        .setTargetX(1)
-                        .setTargetY(1)
-                        .createEvent());
-                if (returnMessage.contains("OK")) {
-                    if(updateClient.getEventlist() != null){
-
-                        // TODO Update client movement on local board
-                    }
-                }
-            }
-            user.disconnectUser(localPlayer); // Disconnect when lifespan of bot is up
+//            boolean gameState = initialStateBattlefield.getValue0();
+//            BattleField localBattlefield = initialStateBattlefield.getValue1();
+//            localPlayer = initialStateBattlefield.getValue2(); // Update local player from server
+//
+//            // If game is running:
+//            if (gameState) {
+////                System.out.println(localBattlefield.getUnits());
+//                System.out.println(localPlayer.getUnitID());
+//                System.out.println(localBattlefield.getMap());
+//            }
+//
+//            while (System.currentTimeMillis() < end) {
+//                Thread.sleep(1000);
+//
+//                for (int i = 0; i < localBattlefield.getUnits().size(); i++) {
+//                    System.out.println(localBattlefield.getUnits().get(i).getX());
+//                    System.out.println(localBattlefield.getUnits().get(i).getY());
+//                }
+//                String returnMessage = user.registerWish(localPlayer, new Move.MoveBuilder(1)
+//                        .setActor_id(localPlayer.getUnitID())
+//                        .setTargetX(1)
+//                        .setTargetY(1)
+//                        .createEvent());
+//                if (returnMessage.contains("OK")) {
+//                    if(updateClient.getEventlist() != null){
+//
+//                        // TODO Update client movement on local board
+//                    }
+//                }
+//            }
+//            user.disconnectUser(localPlayer); // Disconnect when lifespan of bot is up
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,4 +123,9 @@ public class ClientRunner {
 
     }
 
+    @Override
+    public Message onMessageReceived(Message message) {
+        Log.debug(message.toString());
+        return null;
+    }
 }

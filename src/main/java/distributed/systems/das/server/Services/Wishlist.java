@@ -2,20 +2,14 @@ package distributed.systems.das.server.Services;
 
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
-import distributed.systems.das.server.Interfaces.RMIUserInterface;
-import distributed.systems.das.server.State.BattleField;
-import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.Event;
-import org.javatuples.Pair;
-import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,63 +18,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * The wishlist will get a pair of User/RMISendToUserInterface, because the RMI interface will control which users
  * have been connected/disconnected. The User class can be used for security, playerID, nickname etc
  */
-public class WishList extends UnicastRemoteObject implements RMIUserInterface {
+public class Wishlist extends UnicastRemoteObject {
     private static final long serialVersionUID = 1L;
-    static final Logger Log = LoggerFactory.getLogger(WishList.class);
+    static final Logger Log = LoggerFactory.getLogger(Wishlist.class);
 
     private Map<String, RMISendToUserInterface> userCallbacks = new ConcurrentHashMap<>();
     private List<Unit> players = new ArrayList<>();
     private List<IMessageReceivedHandler> listeners = new ArrayList<>();
-    private GameState localGameState;
+    private distributed.systems.das.server.State.GameState localGameState;
 
-    public WishList(GameState localGameState) throws RemoteException {
+    public Wishlist(distributed.systems.das.server.State.GameState localGameState) throws RemoteException {
         super();
         this.localGameState = localGameState;
-    }
-
-    @Override
-    public Triplet<Boolean, BattleField, Unit> connectUser(Unit remotePlayer, RMISendToUserInterface callback) throws RemoteException {
-        if (remotePlayer.getUnitID().isEmpty()) {
-            return null;
-        }
-
-        boolean success = tryPopulate(remotePlayer);
-        if (!success) {
-            return null;
-        }
-
-        Log.info("User connected with ID " + remotePlayer.getUnitID());
-        userCallbacks.put(remotePlayer.getUnitID(), callback);
-        players.add(remotePlayer);
-
-        return Triplet.with(GameState.getRunningState(), BattleField.getBattleField(), remotePlayer);
-    }
-
-    private boolean tryPopulate(Unit remotePlayer) {
-        int x, y, attempt = 0;
-
-        do {
-            x = (int) (Math.random() * BattleField.MAP_WIDTH);
-            y = (int) (Math.random() * BattleField.MAP_HEIGHT);
-            attempt++;
-        } while (!localGameState.getBattleField().spawnUnit(remotePlayer, x, y) && attempt < 10);
-
-        if (!localGameState.getBattleField().getUnit(x, y).getUnitID()
-                .equals(remotePlayer.getUnitID())) {
-            return false;
-        }
-
-        remotePlayer.setPosition(x, y);
-        return true;
-    }
-
-    @Override
-    public void disconnectUser(Unit player) throws RemoteException {
-        players.remove(player);
-        userCallbacks.remove(player.getUnitID());
-        localGameState.getBattleField().removeUnit(player.getX(), player.getY());
-        Log.info("User: " + player.getUnitID() + " disconnected");
-
     }
 
     public String registerWish(Unit player, Event event) throws RemoteException {
@@ -91,7 +40,13 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
             return "You are not registered";
         }
         localGameState.getEventList().add(event);
-        listeners.forEach(x -> x.onMessageReceived(event));
+        listeners.forEach(x -> {
+//            try {
+//                x.onMessageReceived(event);
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+        });
         Log.debug("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
 
         updateClients(event);
@@ -123,12 +78,12 @@ public class WishList extends UnicastRemoteObject implements RMIUserInterface {
                     .filter(x -> x.getUnitID()
                             .equals(unitID))
                     .findFirst().orElse(null);
-            try {
-                disconnectUser(remoteUser);
-            } catch (RemoteException e) {
-                Log.warn("Cannot disconnect User: " + unitID);
-                e.printStackTrace();
-            }
+//            try {
+//                disconnectUser(remoteUser);
+//            } catch (RemoteException e) {
+//                Log.warn("Cannot disconnect User: " + unitID);
+//                e.printStackTrace();
+//            }
         }
     }
 
