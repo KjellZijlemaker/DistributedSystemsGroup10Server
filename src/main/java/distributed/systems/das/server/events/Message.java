@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Message implements Serializable {
+public class Message implements Serializable, Comparable<Message> {
 
     public static final int ATTACK = 1;
     public static final int HEAL = 2;
@@ -31,5 +31,14 @@ public class Message implements Serializable {
         this.id = message.id;
         this.actorID = message.actorID;
         body.putAll(message.body);
+    }
+
+    @Override
+    public int compareTo (Message event) {
+        int comparison = Long.compare (this.timestamp, event.timestamp);
+        if (comparison == 0) {
+            comparison = this.actorID.compareTo (event.actorID);
+        }
+        return comparison;
     }
 }

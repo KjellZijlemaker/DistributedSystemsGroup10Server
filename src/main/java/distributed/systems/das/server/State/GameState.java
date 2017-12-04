@@ -3,7 +3,6 @@ package distributed.systems.das.server.State;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Units.Player;
 import distributed.systems.das.server.Units.Unit;
-import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
 import org.slf4j.Logger;
@@ -110,22 +109,18 @@ public class GameState implements IMessageReceivedHandler {
         disconnectUser(unit);
     }
 
-    synchronized Message execute(Event e) {
-        return null;
-    }
-
     synchronized Message execute(Message message) {
 //		eventList.add (message);
         switch (message.type) {
-            case Event.LOGIN:
+            case Message.LOGIN:
                 return connectUser(message);
-            case Event.ATTACK:
+            case Message.ATTACK:
                 battleField.attack(message);
                 break;
-            case Event.HEAL:
+            case Message.HEAL:
                 battleField.heal(message);
                 break;
-            case Event.MOVE:
+            case Message.MOVE:
                 battleField.move(message);
                 break;
         }
@@ -155,7 +150,7 @@ public class GameState implements IMessageReceivedHandler {
     public synchronized boolean synchronize() {
         // TODO: Handle all the events that have happened since current time
 
-        for (Event event : this.eventList.getEventsByTime(this.lastUpdate, this.time)) {
+        for (Message event : this.eventList.getEventsByTime (this.lastUpdate, this.time)) {
 //            execute(event);
         }
 

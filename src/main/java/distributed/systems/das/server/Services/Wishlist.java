@@ -3,7 +3,7 @@ package distributed.systems.das.server.Services;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.Units.Unit;
-import distributed.systems.das.server.events.Event;
+import distributed.systems.das.server.events.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class Wishlist extends UnicastRemoteObject {
         this.localGameState = localGameState;
     }
 
-    public String registerWish(Unit player, Event event) throws RemoteException {
+    public String registerWish (Unit player, Message event) throws RemoteException {
         boolean exists = players.stream().anyMatch(x -> x.getUnitID()
                 .equals(player.getUnitID()));
         if (!exists) {
@@ -47,21 +47,21 @@ public class Wishlist extends UnicastRemoteObject {
 //                e.printStackTrace();
 //            }
         });
-        Log.debug("Event ID: " + event.getId() + " from User: " + player.getUnitID() + " received");
+        Log.debug ("Event ID: " + event.id + " from User: " + player.getUnitID () + " received");
 
         updateClients(event);
         return "OK";
     }
 
-    public void updateClients(Event event) {
+    public void updateClients (Message event) {
         List<String> brokenConnections = new ArrayList<>();
 
         for (String unitID : userCallbacks.keySet()) { // TODO concurrent modification exception if someone adds element while we are iterating
             RMISendToUserInterface callback = userCallbacks.get(unitID);
             try {
-                callback.update(event);
-            } catch (RemoteException ex) {
-                brokenConnections.add(unitID);
+//                callback.update(event);
+//            } catch (RemoteException ex) {
+//                brokenConnections.add(unitID);
             } finally {
 //                for (int i = 0; i < localGameState.getEventList().getEvents().size(); i++) {
 //                    if (localGameState.getEventList().getEvents().get(i).getActor_id().contains(unitID)) {

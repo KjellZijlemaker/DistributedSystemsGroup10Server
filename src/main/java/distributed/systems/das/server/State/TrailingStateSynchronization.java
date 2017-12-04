@@ -1,8 +1,6 @@
 package distributed.systems.das.server.State;
 
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
-import distributed.systems.das.server.Services.Wishlist;
-import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
 import distributed.systems.das.server.util.AlreadyRunningException;
@@ -12,26 +10,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Implementation of the TSS algorithm. Use the TSSBuilder class to instantiate.
  */
-public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler,
-													 Runnable {
+public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler {
 
-	private CopyOnWriteArrayList<distributed.systems.das.server.State.GameState> states = new CopyOnWriteArrayList<distributed.systems.das.server.State.GameState> ();
+	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private CopyOnWriteArrayList<Integer> delayIntervals = new CopyOnWriteArrayList<> ();
 	private EventList pendingEvents = new EventList ();
 	private Notify notify;
 
 	private boolean running = false;
-	private Thread thread = null;
 
 	/**
 	 * @param startingState
 	 * @param delayInterval interval between the states. Must be divisible by {@code tickrate}
 	 * @param delays        number of delays
 	 * @param tickrate      rate at which time is updated
-	 * @param wishList        {@code WishList} object that will be subscribed to
 	 */
-	private TrailingStateSynchronization (distributed.systems.das.server.State.GameState startingState, int delayInterval,
-										  int delays, int tickrate, Wishlist wishList) {
+	private TrailingStateSynchronization (GameState startingState, int delayInterval,
+										  int delays, int tickrate) {
 
 		if (delayInterval % tickrate != 0 && delayInterval > tickrate) {
 			throw new IllegalArgumentException ("TSS delayInterval MUST be divisible by " +
@@ -39,24 +34,18 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 												"tickrate!");
 		}
 
-		subscribeToNotifications (tickrate, wishList);
+		subscribeToNotifications (tickrate);
 		long time = startingState.getTime ();
 
 		for (int i = 0; i < delays; ++i) { // create states
-			distributed.systems.das.server.State.GameState state = distributed.systems.das.server.State.GameState.clone (startingState);
+			GameState state = GameState.clone (startingState);
 			state.updateTime (time - (i * delayInterval)); // create trails
 			this.states.add (state);
 			this.delayIntervals.add (delayInterval);
 		}
-
-		try {
-			start ();
-		} catch (AlreadyRunningException e) {
-			e.printStackTrace ();
-		}
 	}
 
-	private synchronized void subscribeToNotifications (int tickrate, Wishlist wishList) {
+	private synchronized void subscribeToNotifications (int tickrate) {
 		this.notify = new Notify (tickrate);
 		try {
 			this.notify.start ();
@@ -64,32 +53,22 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			// TODO: Handle this. Can probably just ignore, since it's already running.
 		}
 		this.notify.subscribe (this);
-		wishList.registerListener (this);
-	}
-
-	private synchronized void start () throws AlreadyRunningException {
-		if (!this.running && this.thread == null) {
-			this.thread = new Thread (this);
-			this.running = true;
-			thread.start ();
-		} else {
-			throw new AlreadyRunningException (this.getClass ());
-		}
+//		wishList.registerListener (this);
 	}
 
 	/**
 	 * Adds Event to pending list of events
 	 */
-	public synchronized void addEvent (Event event) {
+	public synchronized void addEvent (Message event) {
 		for (int i = 0; i < states.size (); ++i) {
-			distributed.systems.das.server.State.GameState state = states.get (i);
-			if (state.getTime () > event.getTimestamp ()) {
+			GameState state = states.get (i);
+			if (state.getTime () > event.timestamp) {
 				// "Late moves whose timestamps are earlier than the current execution time for a
 				// state are placed at the head of the pending list for the state and
 				// are executed immediately"
-				pendingEvents.add (0, event);
+//				pendingEvents.add (0, event);
 			} else {
-				pendingEvents.add (event);
+//				pendingEvents.add (event);
 			}
 		}
 	}
@@ -98,14 +77,13 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	 * Executes top element of the pending list of events
 	 * @return false if no more events left to execute
 	 */
-	public synchronized boolean executeEvent () {
+	public synchronized boolean executeEvent (Message event) {
 		int i = 1;
 		if (pendingEvents.isEmpty ()) {
 			return false;
 		}
-		Event event = pendingEvents.pop ();
-		distributed.systems.das.server.State.GameState beforeState = distributed.systems.das.server.State.GameState.clone (getState (0));
-		distributed.systems.das.server.State.GameState afterState = getState (0);
+		GameState beforeState = GameState.clone (getState (0));
+		GameState afterState = getState (0);
 
 		// Execute the command in the leading game state
 		afterState.execute (event);
@@ -117,40 +95,33 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	}
 
 	// TODO: We don't need the whole state, we only need to be able to detect inconsistencies
-	public synchronized distributed.systems.das.server.State.GameState getState (int index) {
+	public synchronized GameState getState (int index) {
 		return this.states.get (index);
 	}
 
 	/**
 	 * Returns whether the changes an event have made to two different states are the same
 	 */
-	public synchronized boolean compareStates (distributed.systems.das.server.State.GameState x, distributed.systems.das.server.State.GameState y) {
+	public synchronized boolean compareStates (GameState x, GameState y) {
 		return x == y;
 	}
 
 	@Override
 	public void update (long time) {
-		for (distributed.systems.das.server.State.GameState state : states) {
+		for (GameState state : states) {
 			state.updateTime (time);
 		}
-		if (!running) {
-			this.running = true;
-			this.thread = new Thread();
-			this.thread.start ();
-		}
+//		if (!running) {
+//			this.running = true;
+//			this.thread = new Thread();
+//			this.thread.start ();
+//		}
 	}
 
 	@Override
 	public Message onMessageReceived (Message event) {
-//		addEvent (event);
-		return null; // TODO fix type compatibility
-	}
-
-	@Override
-	public void run () {
-		while (running) {
-			running = executeEvent ();
-		}
+		executeEvent (event);
+		return new Message (event);
 	}
 
 	private class EventActionListener implements Notify.Listener {
@@ -158,19 +129,19 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		private final long tickRate;
 
 		private int index;
-		private distributed.systems.das.server.State.GameState before;
-		private distributed.systems.das.server.State.GameState after;
+		private GameState before;
+		private GameState after;
 		private long eventId;
-		private Event event;
+		private Message event;
 
 		private int counter;
 
-		public EventActionListener (int index, distributed.systems.das.server.State.GameState before,
-									distributed.systems.das.server.State.GameState after, Event event) {
+		public EventActionListener (int index, GameState before,
+									GameState after, Message event) {
 			this.index = index;
 			this.before = before;
 			this.after = after;
-			this.eventId = event.getId ();
+			this.eventId = event.id;
 			this.event = event;
 			this.counter = 0;
 			this.tickRate = notify.getTickRate ();
@@ -192,8 +163,8 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			// state that the execution of a command produced, and compares them with the
 			// changes recorded in the directly preceding state"
 
-			distributed.systems.das.server.State.GameState comparisonAfter = getState (index);
-			distributed.systems.das.server.State.GameState comparisonBefore = distributed.systems.das.server.State.GameState.clone (comparisonAfter);
+			GameState comparisonAfter = getState (index);
+			GameState comparisonBefore = GameState.clone (comparisonAfter);
 			comparisonAfter.execute (event);
 			if (!compareStates (this.before, comparisonBefore) ||
 				!compareStates (this.after, comparisonAfter)) {
@@ -221,13 +192,12 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	}
 
 	public static class TSSBuilder {
-		private distributed.systems.das.server.State.GameState startingState;
+		private GameState startingState;
 		private int delayInterval;
 		private int delays;
 		private int tickrate;
-		private Wishlist wishList;
 
-		public TSSBuilder (distributed.systems.das.server.State.GameState startingState) {
+		public TSSBuilder (GameState startingState) {
 			this.startingState = startingState;
 		}
 
@@ -258,18 +228,9 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			return this;
 		}
 
-		public Wishlist getWishList () {
-			return wishList;
-		}
-
-		public TSSBuilder setWishList (Wishlist wishList) {
-			this.wishList = wishList;
-			return this;
-		}
-
 		public TrailingStateSynchronization createTSS () {
 			return new TrailingStateSynchronization (this.startingState, this.delayInterval,
-													 this.delays, this.tickrate, this.wishList);
+													 this.delays, this.tickrate);
 		}
 	}
 
