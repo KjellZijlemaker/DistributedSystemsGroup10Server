@@ -67,6 +67,6 @@ public class HeartbeatService implements IMessageReceivedHandler, Runnable {
     }
 
     private void sendHeartbeat() {
-        monitoredEndpoints.entrySet().stream();
+        monitoredEndpoints.entrySet().stream(); // TODO currently not used
     }
 }

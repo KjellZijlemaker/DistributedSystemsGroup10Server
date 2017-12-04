@@ -3,6 +3,7 @@ package distributed.systems.das.server;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.Services.Callback;
+import distributed.systems.das.server.Services.HeartbeatService;
 import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.Units.Player;
 import distributed.systems.das.server.Units.Unit;
@@ -80,8 +81,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             m.body.put("y", 1);
             server.onMessageReceived(m);
 
-            m = new Message(2, System.currentTimeMillis(), playerID, Message.HEARTBEAT);
-            server.onMessageReceived(m);
+            runner.startHeartbeat(server, playerID);
 
             // Get values from server
 //            boolean gameState = initialStateBattlefield.getValue0();
@@ -127,5 +127,13 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     public Message onMessageReceived(Message message) {
         Log.debug(message.toString());
         return null;
+    }
+
+    private void startHeartbeat(IMessageReceivedHandler server, String playerID) throws Exception {
+        Message m = new Message(2, System.currentTimeMillis(), playerID, Message.HEARTBEAT);
+        while (true) {
+            server.onMessageReceived(m);
+            Thread.sleep(10);
+        }
     }
 }
