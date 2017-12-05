@@ -5,6 +5,7 @@ import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.Services.Callback;
 import distributed.systems.das.server.Services.HeartbeatService;
 import distributed.systems.das.server.State.BattleField;
+import distributed.systems.das.server.Units.Dragon;
 import distributed.systems.das.server.Units.Player;
 import distributed.systems.das.server.Units.Unit;
 import distributed.systems.das.server.events.*;
@@ -60,7 +61,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             end = (long) (currentTime + botTime);
         }
 
-        Unit localPlayer = new Player(10, 10, playerID);
+//        Unit localPlayer = new Player(10, 10, playerID);
 
 
         Callback updateClient = new Callback();
@@ -74,53 +75,197 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             remoteRegistry.bind(playerID, runner);
 
             Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
-            server.onMessageReceived(m);
+            Message loginResp = server.onMessageReceived(m);
+            Unit u = (Unit)loginResp.body.get("unit");
+            Player p = new Player(u.getMaxHitPoints(), u.getAttackPoints(), u.getUnitID());
+            System.out.println(u);
+            BattleField battlefield = (BattleField)loginResp.body.get("battlefield");
+            System.out.println(u.getX()+" - "+u.getY());
 
-            m = new Message(1, System.currentTimeMillis(), playerID, Message.MOVE);
-            m.body.put("x", 1);
-            m.body.put("y", 1);
-            server.onMessageReceived(m);
+            runner.startSimulation(server, p, battlefield);
+            
+            System.out.print("11\n");
 
-            runner.startHeartbeat(server, playerID);
-
-            // Get values from server
-//            boolean gameState = initialStateBattlefield.getValue0();
-//            BattleField localBattlefield = initialStateBattlefield.getValue1();
-//            localPlayer = initialStateBattlefield.getValue2(); // Update local player from server
-//
-//            // If game is running:
-//            if (gameState) {
-////                System.out.println(localBattlefield.getUnits());
-//                System.out.println(localPlayer.getUnitID());
-//                System.out.println(localBattlefield.getMap());
-//            }
-//
-//            while (System.currentTimeMillis() < end) {
-//                Thread.sleep(1000);
-//
-//                for (int i = 0; i < localBattlefield.getUnits().size(); i++) {
-//                    System.out.println(localBattlefield.getUnits().get(i).getX());
-//                    System.out.println(localBattlefield.getUnits().get(i).getY());
-//                }
-//                String returnMessage = user.registerWish(localPlayer, new Move.MoveBuilder(1)
-//                        .setActor_id(localPlayer.getUnitID())
-//                        .setTargetX(1)
-//                        .setTargetY(1)
-//                        .createEvent());
-//                if (returnMessage.contains("OK")) {
-//                    if(updateClient.getEventlist() != null){
-//
-//                        // TODO Update client movement on local board
-//                    }
-//                }
-//            }
-//            user.disconnectUser(localPlayer); // Disconnect when lifespan of bot is up
+            //runner.startHeartbeat(server, playerID);
 
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(2);
         }
 
+    }
+    
+    private boolean findAndHeal(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {	
+    	int nx = p.getX();
+    	int ny = p.getY();
+    	
+    	int tx = -1;
+		int ty = -1;
+		
+		boolean found = false;
+
+    	for (int i=-5; i<=5; i++) {
+    		for (int j=-5; j<=5; j++) {
+    			if (Math.abs(i) + Math.abs(j) > 5) {
+    				continue;
+    			}
+    			
+    			tx = nx + i;
+    			ty = ny + j;
+
+    			if (!battlefield.isLegalCoordinates(tx, ty)) {
+    				continue;
+    			}
+    			
+    			Unit u = battlefield.getUnit(tx, ty);
+    			
+    			if (!(u instanceof Player)) {
+    				continue;
+    			}
+    			
+    			Player tp = (Player)u;
+    			if (tp.getHitPoints() <= tp.getMaxHitPoints() / 2) {
+    				Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.HEAL);
+    				m.body.put("x", tx);
+    				m.body.put("y", ty);
+    				m.body.put("ap", p.getAttackPoints()); // TODO: check if server use this name "ap"
+    					
+    				Message resp_m = server.onMessageReceived(m);
+    				battlefield.heal(resp_m);
+    				
+    				found = true;
+        			break;
+    			}
+    		}
+    		
+    		if (found) {
+    			break;
+    		}
+    	}
+    
+    	return found;
+    }
+    
+    private boolean directlyAttack(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
+    	int nx = p.getX();
+    	int ny = p.getY();
+    	
+    	int tx = -1;
+		int ty = -1;
+		
+		boolean found = false;
+
+    	for (int i=-2; i<=2; i++) {
+    		for (int j=-2; j<=2; j++) {
+    			if (Math.abs(i) + Math.abs(j) > 2) {
+    				continue;
+    			}
+    			
+    			tx = nx + i;
+    			ty = ny + j;
+
+    			if (!battlefield.isLegalCoordinates(tx, ty)) {
+    				continue;
+    			}
+
+    			Unit u = battlefield.getUnit(tx, ty);
+    			
+    			if (!(u instanceof Dragon)) {
+    				continue;
+    			}
+    			
+    			Dragon td = (Dragon)u;
+
+    			Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
+    			m.body.put("x", tx);
+    			m.body.put("y", ty);
+    			m.body.put("ap", p.getAttackPoints()); // TODO: check if server use this name "ap"
+    					
+    			Message resp_m = server.onMessageReceived(m);
+    			battlefield.attack(resp_m);
+    			
+    			found = true;
+    			break;
+    		}
+    		
+    		if (found) {
+    			break;
+    		}
+    	}
+    	
+    	return found;
+    }
+    
+    //// need rechecking
+    private boolean findNearestDragonAndMove(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
+    	int nx = p.getX();
+    	int ny = p.getY();
+    	
+    	int tx = -1;
+		int ty = -1;
+		
+		boolean found = false;
+
+    	for (int i=-2; i<=2; i++) {
+    		for (int j=-2; j<=2; j++) {
+    			if (Math.abs(i) + Math.abs(j) > 2) {
+    				continue;
+    			}
+    			
+    			tx = nx + i;
+    			ty = ny + j;
+
+    			if (!battlefield.isLegalCoordinates(tx, ty)) {
+    				continue;
+    			}
+
+    			Unit u = battlefield.getUnit(tx, ty);
+    			
+    			if (!(u instanceof Dragon)) {
+    				continue;
+    			}
+    			
+    			Dragon td = (Dragon)u;
+
+    			Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
+    			m.body.put("x", tx);
+    			m.body.put("y", ty);
+    			m.body.put("ap", p.getAttackPoints()); // TODO: check if server use this name "ap"
+    					
+    			Message resp_m = server.onMessageReceived(m);
+    			battlefield.attack(resp_m);
+    			
+    			found = true;
+    			break;
+    		}
+    		
+    		if (found) {
+    			break;
+    		}
+    	}
+    	
+    	return found;
+    }
+    
+    
+    private void startSimulation(IMessageReceivedHandler server, Player p, BattleField battlefield) {
+    	Random random = new Random();
+    	
+    	try {
+	    	while (true) {
+	    		
+	    		
+	    		boolean strategy = findAndHeal(server, p, battlefield)
+	    			|| directlyAttack(server, p, battlefield)
+	    			|| findNearestDragonAndMove(server, p, battlefield);
+	    			
+	    		
+	    		
+	    		Thread.sleep(1000);
+	    	}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
     @Override
@@ -133,7 +278,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         Message m = new Message(2, System.currentTimeMillis(), playerID, Message.HEARTBEAT);
         while (true) {
             server.onMessageReceived(m);
-            Thread.sleep(10);
+            Thread.sleep(1000);
         }
     }
 }
