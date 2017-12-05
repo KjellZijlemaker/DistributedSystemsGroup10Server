@@ -37,6 +37,10 @@ public class BattleField implements Serializable {
             this.units = new ArrayList<Unit>();
         }
     }
+    
+    public boolean isLegalCoordinates(int x, int y) {
+    	return x>-1 && x<MAP_WIDTH && y>-1 && y<MAP_HEIGHT;
+    }
 
     private BattleField(int width, int height, Unit[][] map, ArrayList<Unit> units) {
         synchronized (this) {
