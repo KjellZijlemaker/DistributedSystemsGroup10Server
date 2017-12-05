@@ -1,6 +1,7 @@
 package distributed.systems.das.server;
 
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
+import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.Services.Callback;
 import distributed.systems.das.server.Services.HeartbeatService;
@@ -64,24 +65,56 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
 
         Callback updateClient = new Callback();
+
         try {
 
             ClientRunner runner = new ClientRunner();
             String serverID = "123";
             Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
-            System.out.println(Arrays.toString(remoteRegistry.list()));
             IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
             remoteRegistry.bind(playerID, runner);
 
             Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
             server.onMessageReceived(m);
-
+            System.out.println(Arrays.toString(remoteRegistry.list()));
             m = new Message(1, System.currentTimeMillis(), playerID, Message.MOVE);
             m.body.put("x", 1);
             m.body.put("y", 1);
             server.onMessageReceived(m);
 
-            runner.startHeartbeat(server, playerID);
+
+            /**
+             * Start heartbeat thread
+             */
+            String finalPlayerID = playerID;
+            new Thread(() -> {
+                try {
+                    runner.startHeartbeat(server, finalPlayerID);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+
+            /**
+             * Getting updates from server
+             */
+            Callback callback = new Callback();
+            while (true){
+                Thread.sleep(200);
+
+                if(callback.getUpdate() != null){
+                    System.out.println(callback.getUpdate());
+                    Message callbackMessage = callback.getUpdate();
+                    switch (callbackMessage.type){
+                        case Message.ATTACK:
+                            System.out.println("Attacked, you have: " + callbackMessage.body.get("adjustedHitpoints"));
+                    }
+
+                }
+
+            }
+
 
             // Get values from server
 //            boolean gameState = initialStateBattlefield.getValue0();
@@ -136,4 +169,6 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             Thread.sleep(10);
         }
     }
+
+
 }

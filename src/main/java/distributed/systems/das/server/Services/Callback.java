@@ -3,12 +3,13 @@ package distributed.systems.das.server.Services;
 import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
 import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
+import distributed.systems.das.server.events.Message;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class Callback extends UnicastRemoteObject implements RMISendToUserInterface {
-    private Event event;
+    private Message message;
 
     public Callback() throws RemoteException {
         super();
@@ -16,12 +17,13 @@ public class Callback extends UnicastRemoteObject implements RMISendToUserInterf
 
 
     @Override
-    public void update(Event events) throws RemoteException {
-        this.event = events;
+    public void update(Message message) throws RemoteException {
+        this.message = message;
     }
 
-    public Event getEventlist(){
-        return this.event;
+    @Override
+    public Message getUpdate() throws RemoteException {
+        return this.message;
     }
 
 }
