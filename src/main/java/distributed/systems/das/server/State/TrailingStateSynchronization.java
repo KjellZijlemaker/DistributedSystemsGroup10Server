@@ -77,21 +77,18 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	 * Executes top element of the pending list of events
 	 * @return false if no more events left to execute
 	 */
-	public synchronized boolean executeEvent (Message event) {
+	public synchronized Message executeEvent (Message event) {
 		int i = 1;
-		if (pendingEvents.isEmpty ()) {
-			return false;
-		}
 		GameState beforeState = GameState.clone (getState (0));
 		GameState afterState = getState (0);
 
 		// Execute the command in the leading game state
-		afterState.execute (event);
+		Message returnValue = afterState.execute (event);
 
 		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
 															event);
 		this.notify.subscribe (listener);
-		return true;
+		return returnValue;
 	}
 
 	// TODO: We don't need the whole state, we only need to be able to detect inconsistencies
@@ -120,8 +117,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 
 	@Override
 	public Message onMessageReceived (Message event) {
-		executeEvent (event);
-		return new Message (event);
+		return executeEvent (event);
 	}
 
 	private class EventActionListener implements Notify.Listener {
