@@ -1,6 +1,11 @@
 package distributed.systems.das.server.Units;
 
+import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
+import distributed.systems.das.server.Services.Callback;
+import distributed.systems.das.server.events.Message;
+
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 /**
  * Base class for all players whom can
@@ -76,7 +81,28 @@ public abstract class Unit implements Serializable {
 	}
 
 	public void dealDamage (int x, int y, int damage) {
-		// TODO: might need this
+		RMISendToUserInterface callback = null;
+		try {
+			callback = new Callback();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+
+		Unit adjacentPlayer = this.getUnit(x, y);
+		int newHealth = adjacentPlayer.getHitPoints() - damage;
+		adjacentPlayer.hitPoints = newHealth;
+
+		try {
+
+			Message m = new Message(1, System.currentTimeMillis(), adjacentPlayer.unitID, Message.ATTACK);
+			m.body.put("adjustedHitpoints", newHealth);
+
+			if (callback != null) {
+				callback.update(m);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void healDamage (int x, int y, int healed) {
