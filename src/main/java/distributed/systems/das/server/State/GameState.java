@@ -55,7 +55,7 @@ public class GameState implements IMessageReceivedHandler {
 
     public Message connectUser(Message message) {
         Unit remotePlayer = initPlayer(message.actorID);
-        boolean success = tryPopulate(remotePlayer);
+        boolean success = populatePlayer(remotePlayer);
         if (!success) {
             return null;
         }
@@ -76,7 +76,7 @@ public class GameState implements IMessageReceivedHandler {
         return new Player(hp, ap, unitID);
     }
 
-    private boolean tryPopulate(Unit remotePlayer) {
+    private boolean populatePlayer(Unit remotePlayer) {
         int x, y, attempt = 0;
 
         do {
@@ -91,6 +91,25 @@ public class GameState implements IMessageReceivedHandler {
         }
 
         remotePlayer.setPosition(x, y);
+        return true;
+    }
+
+    public boolean populateDragon(Unit localDragon){
+
+			/* Try picking a random spot */
+            int x, y, attempt = 0;
+            do {
+                x = (int) (Math.random() * BattleField.MAP_WIDTH);
+                y = (int) (Math.random() * BattleField.MAP_HEIGHT);
+                attempt++;
+            } while (!battleField.spawnUnit(localDragon, x, y) && attempt < 10);
+
+        if (!battleField.getUnit(x, y).getUnitID()
+                .equals(localDragon.getUnitID())) {
+            return false;
+        }
+        localDragon.setPosition(x, y);
+
         return true;
     }
 

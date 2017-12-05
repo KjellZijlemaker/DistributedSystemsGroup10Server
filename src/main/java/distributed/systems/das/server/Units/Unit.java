@@ -1,7 +1,6 @@
 package distributed.systems.das.server.Units;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * Base class for all players whom can
@@ -155,13 +154,17 @@ public abstract class Unit implements Serializable {
 	/**
 	 * Returns whether the indicated square contains a player, a dragon or nothing.
 	 *
-	 * @param x: x coordinate
-	 * @param y: y coordinate
+	 * @param x : x coordinate
+	 * @param y : y coordinate
 	 * @return UnitType: the indicated square contains a player, a dragon or nothing.
 	 */
-	protected void getType (int x, int y) {
-		// TODO: Might need this
+	protected UnitType getType (int x, int y) {
+		if (getUnit(x, y) instanceof Player)
+			return UnitType.player;
+		else if (getUnit(x, y) instanceof Dragon)
+			return UnitType.dragon;
 
+		return null;
 	}
 
 	protected Unit getUnit (int x, int y) {
