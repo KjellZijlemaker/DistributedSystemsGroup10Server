@@ -86,7 +86,37 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             
             System.out.print("11\n");
 
-            //runner.startHeartbeat(server, playerID);
+            /**
+             * Start heartbeat thread
+             */
+            String finalPlayerID = playerID;
+            new Thread(() -> {
+                try {
+                    runner.startHeartbeat(server, finalPlayerID);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+
+            /**
+             * Getting updates from server
+             */
+            Callback callback = new Callback();
+            while (true){
+                Thread.sleep(200);
+
+                if(callback.getUpdate() != null){
+                    System.out.println(callback.getUpdate());
+                    Message callbackMessage = callback.getUpdate();
+                    switch (callbackMessage.type){
+                        case Message.ATTACK:
+                            System.out.println("Attacked, you have: " + callbackMessage.body.get("adjustedHitpoints"));
+                    }
+
+                }
+
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
