@@ -15,7 +15,7 @@ public class BotSimulatorGTA {
 	private static List<Bot> bots;
 
 	public static void main(String[] args) {
-		String path = "src/main/java/distributed/systems/das/client/bot/SC2_Edge_Detailed";
+		String path = "src/main/java/distributed/systems/das/server/bot/SC2_Edge_Detailed";
 		System.out.println("Opening GTAv06 file at "+path);
 		bots = readGTAv06File(path);
 		
