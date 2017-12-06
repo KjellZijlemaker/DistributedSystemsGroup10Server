@@ -1,6 +1,5 @@
 package distributed.systems.das.server.Units;
 
-import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class Dragon extends Unit implements Runnable{
 
     @Override
     public void run() {
-        ArrayList<Direction> adjacentPlayers = new ArrayList<Direction> ();
+		ArrayList<Player> adjacentPlayers = new ArrayList<> ();
 
         this.running = true;
 
@@ -51,43 +50,28 @@ public class Dragon extends Unit implements Runnable{
                     break;
 
                 // Decide what players are near
-                if (getY() > 0)
-                    if (getType(getX(), getY() - 1) == UnitType.player)
-                        adjacentPlayers.add(Direction.up);
-                if (getY() < BattleField.MAP_WIDTH - 1)
-                    if (getType(getX(), getY() + 1) == UnitType.player)
-                        adjacentPlayers.add(Direction.down);
-                if (getX() > 0)
-                    if (getType(getX() - 1, getY()) == UnitType.player)
-                        adjacentPlayers.add(Direction.left);
-                if (getX() < BattleField.MAP_WIDTH - 1)
-                    if (getType(getX() + 1, getY()) == UnitType.player)
-                        adjacentPlayers.add(Direction.right);
-
-                // Pick a random player to attack
-                if (adjacentPlayers.size() == 0)
+				int x = getX ();
+				int y = getY ();
+				for (int i = (x - 2); i <= (x + 2); ++i) {
+					for (int j = (y - 2); j <= (y + 2); ++y) {
+						if (getType (i, j) == UnitType.player) {
+							Player player = new Player (10, 10, "null");
+							player.setPosition (i, j);
+							adjacentPlayers.add (player);
+						}
+					}
+				}
+				// Pick a random player to attack
+				if (adjacentPlayers.size() == 0)
                     continue; // There are no players to attack
 
-                Direction playerToAttack = adjacentPlayers.get((int) (Math.random() * adjacentPlayers.size()));
+				Player playerToAttack = adjacentPlayers.get ((int) (Math.random () *
+						adjacentPlayers.size ()));
 
-                // Attack the player
-                switch (playerToAttack) {
-                    case up:
-                        this.dealDamage(getX(), getY() - 1, this.getAttackPoints());
-                        break;
-                    case right:
-                        this.dealDamage(getX() + 1, getY(), this.getAttackPoints());
-                        break;
-                    case down:
-                        this.dealDamage(getX(), getY() + 1, this.getAttackPoints());
-                        break;
-                    case left:
-                        this.dealDamage(getX() - 1, getY(), this.getAttackPoints());
-                        break;
-                }
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+				this.dealDamage (playerToAttack.getX (), playerToAttack.getY
+						(), this.getAttackPoints ());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
             }
         }
     }
