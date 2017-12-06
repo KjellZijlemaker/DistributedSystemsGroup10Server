@@ -87,12 +87,15 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	 * @return false if no more events left to execute
 	 */
 	public synchronized Message executeEvent (Message event) {
+		Log.debug("Executing event");
 		int i = 1;
 		GameState beforeState = GameState.clone (getState (0));
 		GameState afterState = getState (0);
 
 		// Execute the command in the leading game state
 		Message returnValue = afterState.execute (event);
+		
+		Log.debug("Unit x coordinate: " + afterState.getBattleField().getUnit("test").getX () + ", Type:" + event.type);
 
 		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
 															event);

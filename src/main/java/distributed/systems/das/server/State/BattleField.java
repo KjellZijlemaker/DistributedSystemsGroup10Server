@@ -115,7 +115,7 @@ public class BattleField implements Serializable {
         map[x][y] = unit;
         unit.setPosition(x, y);
 
-        Log.debug("putUnit "+unit.getUnitID()+" on "+x+" "+y);
+        //Log.debug("putUnit "+unit.getUnitID()+" on "+x+" "+y);
         return true;
     }
 

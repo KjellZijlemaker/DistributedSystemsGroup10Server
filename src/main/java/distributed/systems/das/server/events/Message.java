@@ -43,4 +43,5 @@ public class Message implements Serializable, Comparable<Message> {
         }
         return comparison;
     }
+    
 }

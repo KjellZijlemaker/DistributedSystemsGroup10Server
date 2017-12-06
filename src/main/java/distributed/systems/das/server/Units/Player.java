@@ -14,5 +14,12 @@ public class Player extends Unit{
     public Player(int maxHealth, int attackPoints, String playerID) {
         super(maxHealth, attackPoints, playerID);
     }
+    
+    public void logStatus() {
+    	System.out.println("---Status for Player " + this.getUnitID() + "---");
+    	System.out.println("coordinats: " + this.getX() + "," + this.getY());
+    	System.out.println("health points: " + this.getHitPoints() + "/" + this.getMaxHitPoints());
+    	System.out.println("---End Status---");
+    }
 
 }
