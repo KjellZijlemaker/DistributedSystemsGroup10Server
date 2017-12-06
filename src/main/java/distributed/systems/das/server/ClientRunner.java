@@ -47,6 +47,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
         String playerID = UUID.randomUUID().toString();
 
+
         // Create list with servers
         java.util.List<Map.Entry<String, Integer>> servers = new java.util.ArrayList<>();
         servers.add(new java.util.AbstractMap.SimpleEntry<>("localhost", 5454));
@@ -80,7 +81,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
             Message loginResp = server.onMessageReceived(m);
             Unit u = (Unit)loginResp.body.get("unit");
-            Player p = (Player)u;
+            Player p = new Player(u.getMaxHitPoints(), u.getAttackPoints(), u.getUnitID());
             BattleField battlefield = (BattleField)loginResp.body.get("battlefield");
 
             for (int i=0; i<BattleField.MAP_WIDTH; i++) {
@@ -139,8 +140,6 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     }
     
     private boolean findAndHeal(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {	
-    	System.out.println("try find and heal");
-    	
     	int nx = p.getX();
     	int ny = p.getY();
     	
@@ -188,13 +187,10 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     		}
     	}
     
-    	System.out.println("try find and heal res:" + found);
-    	if (found) p.logStatus();
     	return found;
     }
     
     private boolean directlyAttack(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-    	System.out.println("try directly attack");
     	int nx = p.getX();
     	int ny = p.getY();
     	
@@ -241,15 +237,12 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     		}
     	}
     	
-    	System.out.println("try directly attack res:" + found);
-    	if (found) p.logStatus();
     	return found;
     }
 
     private boolean findNearestDragonAndMove(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
     	int nx = p.getX();
     	int ny = p.getY();
-    	System.out.println("try find and move. Current coordinates: "+nx+","+ny);
     	
     	int nd = 0x7fffffff;
     	int tx=-1, ty=-1;
@@ -272,11 +265,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     		}
     	}
     	
-    	
-    	if (tx == -1 && ty == -1) {
-    		System.out.println("try find and move res:" + false);
-    		return false;
-    	}
+    	if (tx == -1 && ty == -1) return false;
     	
     	int mx=nx, my=ny;
     	if (tx != nx) {
@@ -284,19 +273,18 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     	} else {
     		my += (ty-ny)/Math.abs(ty-ny);
     	}
-    	
-    	System.out.println("try to move to " + mx + "," + my);
+
+    	System.out.println(nx + ", " + ny);
 		Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
 		m.body.put("x", mx);
 		m.body.put("y", my);
 				
-		//System.out.println(m.body.toString());
 		Message resp_m = server.onMessageReceived(m);
 		battlefield.move(resp_m);
-    	
-		System.out.println("try find and move res:" + true);
-		p.logStatus();
-    	return true;
+
+        System.out.println(resp_m.body);
+
+        return true;
     }
     
     

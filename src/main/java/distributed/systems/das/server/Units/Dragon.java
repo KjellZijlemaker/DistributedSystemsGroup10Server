@@ -19,7 +19,6 @@ public class Dragon extends Unit implements Runnable{
     public static final int MIN_ATTACKPOINTS = 5;
     public static final int MAX_ATTACKPOINTS = 20;
     private boolean running;
-    private String dragonID;
 
 
     public Dragon(String UUID) {

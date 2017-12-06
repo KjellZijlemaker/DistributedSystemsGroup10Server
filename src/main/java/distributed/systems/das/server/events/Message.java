@@ -13,6 +13,7 @@ public class Message implements Serializable, Comparable<Message> {
     public static final int MOVE = 3;
     public static final int HEARTBEAT = 4;
     public static final int LOGIN = 5;
+    public static final int HANDSHAKE = 6;
 
     public Map<String, Object> body = new HashMap<>();
     public final int id;

@@ -65,7 +65,7 @@ public class GameState implements IMessageReceivedHandler {
 //        players.add(remotePlayer);
 
         Message response = new Message(message);
-        response.body.put("battlefield", battleField);
+        response.body.put("battlefield", this.getBattleField());
         response.body.put("unit", remotePlayer);
         return response;
     }
