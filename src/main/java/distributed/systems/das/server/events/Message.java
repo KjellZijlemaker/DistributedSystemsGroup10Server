@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Message implements Serializable, Comparable<Message> {
 
-	private static long serialVersionUID = 1L;
+    private static long serialVersionUID = 50L;
 
     public static final int ATTACK = 1;
     public static final int HEAL = 2;
