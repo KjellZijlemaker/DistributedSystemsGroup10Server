@@ -69,16 +69,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
         Callback updateClient = new Callback();
         try {
-            System.out.println("playerID: "+playerID);
-
-            ArrayList<String> test=new ArrayList<String>();
-            test.add("3,-1,-1");
-            test.add("100,-1,-1");
-            test.add("50,-1,-1");
-            
-        	Collections.sort(test);
-
-            System.out.println(test);
+            System.out.println("playerID: "+playerID);      
             
             ClientRunner runner = new ClientRunner();
             String serverID = "123";
@@ -93,6 +84,18 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             Player p = new Player(u.getMaxHitPoints(), u.getAttackPoints(), u.getUnitID());
             BattleField battlefield = (BattleField)loginResp.body.get("battlefield");
 
+            for (int i=0; i<BattleField.MAP_WIDTH; i++) {
+        		for (int j=0; j<BattleField.MAP_HEIGHT; j++) {
+    	
+    				Unit u2 = battlefield.getUnit(i, j);
+    				if (!(u2 instanceof Dragon)) {
+    					continue;
+    				}
+
+    				System.out.println("A dragon at ("+i+","+j+")!");
+
+        		}
+        	}            
             
             runner.startSimulation(server, p, battlefield);
             
@@ -220,7 +223,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     			Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
     			m.body.put("x", tx);
     			m.body.put("y", ty);
-    			m.body.put("damage", p.getAttackPoints()); // TODO: check if server use this name "ap"
+    			m.body.put("damage", p.getAttackPoints());
     					
     			Message resp_m = server.onMessageReceived(m);
     			battlefield.attack(resp_m);
@@ -265,15 +268,12 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     	if (tx == -1 && ty == -1) return false;
     	
     	int mx=nx, my=ny;
-    	int dx = (tx-nx)/Math.abs(tx-nx);
-    	int dy = (ty-ny)/Math.abs(ty-ny);
-    	if (dx == 0) {
-    		my += dy;
+    	if (tx != nx) {
+    		mx += (tx-nx)/Math.abs(tx-nx);
     	} else {
-    		mx += dx;
+    		my += (ty-ny)/Math.abs(ty-ny);
     	}
-
-    	//TODO: implement move
+    	
 		Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
 		m.body.put("x", mx);
 		m.body.put("y", my);
@@ -291,7 +291,6 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     	try {
 	    	while (true) {	    		
 	    	    
-	    	    //TODO: test each action
 	    		boolean action = findAndHeal(server, p, battlefield)
 	    			|| directlyAttack(server, p, battlefield)
 	    			|| findNearestDragonAndMove(server, p, battlefield);
