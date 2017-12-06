@@ -1,10 +1,7 @@
 package distributed.systems.das.server.State;
 
 import distributed.systems.das.server.Units.Unit;
-import distributed.systems.das.server.events.Attack;
-import distributed.systems.das.server.events.Heal;
 import distributed.systems.das.server.events.Message;
-import distributed.systems.das.server.events.Move;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +13,7 @@ public class BattleField implements Serializable {
     /* The array of units */
     private Unit[][] map;
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 10L;
 
     /* The static singleton */
     private static BattleField battlefield;
