@@ -5,6 +5,8 @@ import distributed.systems.das.server.Units.Dragon;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
 import distributed.systems.das.server.util.AlreadyRunningException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -12,6 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Implementation of the TSS algorithm. Use the TSSBuilder class to instantiate.
  */
 public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler {
+
+	static final Logger Log = LoggerFactory.getLogger (TrailingStateSynchronization.class);
 
 	private CopyOnWriteArrayList<GameState> states = new CopyOnWriteArrayList<GameState> ();
 	private CopyOnWriteArrayList<Integer> delayIntervals = new CopyOnWriteArrayList<> ();
@@ -169,6 +173,7 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 			comparisonAfter.execute (event);
 			if (!compareStates (this.before, comparisonBefore) ||
 				!compareStates (this.after, comparisonAfter)) {
+				Log.debug ("Inconsistency found!");
 				long time = this.after.getTime ();
 
 				// TODO: More efficient way of replacing state? Perhaps only update select vars
