@@ -281,9 +281,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     		e.printStackTrace();
     	}
     }
-
     			
-    				continue;
     @Override
     public Message onMessageReceived(Message message) {
         Log.debug(message.toString());
