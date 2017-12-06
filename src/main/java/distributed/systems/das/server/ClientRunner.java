@@ -1,5 +1,6 @@
 package distributed.systems.das.server;
 
+import distributed.systems.das.exception.ActionFailedException;
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
 import distributed.systems.das.server.Interfaces.RMIUserInterface;
 import distributed.systems.das.server.Services.Callback;
@@ -70,6 +71,15 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         try {
             System.out.println("playerID: "+playerID);
 
+            ArrayList<String> test=new ArrayList<String>();
+            test.add("3,-1,-1");
+            test.add("100,-1,-1");
+            test.add("50,-1,-1");
+            
+        	Collections.sort(test);
+
+            System.out.println(test);
+            
             ClientRunner runner = new ClientRunner();
             String serverID = "123";
             Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
@@ -83,6 +93,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             Player p = new Player(u.getMaxHitPoints(), u.getAttackPoints(), u.getUnitID());
             BattleField battlefield = (BattleField)loginResp.body.get("battlefield");
 
+            
             runner.startSimulation(server, p, battlefield);
             
             //runner.startHeartbeat(server, playerID);
@@ -121,7 +132,6 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(2);
         }
 
     }
@@ -231,10 +241,8 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     	int nx = p.getX();
     	int ny = p.getY();
     	
-    	int tx = -1;
-		int ty = -1;
-
-		ArrayList<String> AliveDragons=new ArrayList<String>();
+    	int nd = 0x7fffffff;
+    	int tx=-1, ty=-1;
 		
     	for (int i=0; i<BattleField.MAP_WIDTH; i++) {
     		for (int j=0; j<BattleField.MAP_HEIGHT; j++) {
@@ -245,26 +253,39 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 				}
 
 				int distance = (Math.abs(nx-i) + Math.abs(ny-j));
-				AliveDragons.add(distance+","+tx+","+ty);
+				if (distance < nd) {
+					nd = distance;
+					tx = i;
+					ty = j;
+				}
 
     		}
     	}
-
-    	Collections.sort(AliveDragons);
     	
+    	if (tx == -1 && ty == -1) return false;
+    	
+    	int mx=nx, my=ny;
+    	int dx = (tx-nx)/Math.abs(tx-nx);
+    	int dy = (ty-ny)/Math.abs(ty-ny);
+    	if (dx == 0) {
+    		my += dy;
+    	} else {
+    		mx += dx;
+    	}
+
     	//TODO: implement move
 		Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
-		m.body.put("x", tx);
-		m.body.put("y", ty);
+		m.body.put("x", mx);
+		m.body.put("y", my);
 				
 		Message resp_m = server.onMessageReceived(m);
 		battlefield.move(resp_m);
     	
-    	return (!AliveDragons.isEmpty());
+    	return true;
     }
     
     
-    private void startSimulation(IMessageReceivedHandler server, Player p, BattleField battlefield) {
+    private void startSimulation(IMessageReceivedHandler server, Player p, BattleField battlefield) throws ActionFailedException {
     	Random random = new Random();
     	
     	try {
@@ -274,6 +295,10 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 	    		boolean action = findAndHeal(server, p, battlefield)
 	    			|| directlyAttack(server, p, battlefield)
 	    			|| findNearestDragonAndMove(server, p, battlefield);
+	    		
+	    		if (!action) {
+	    			throw new ActionFailedException();
+	    		}
 	    		
 	    		Thread.sleep(1000);
 	    	}
