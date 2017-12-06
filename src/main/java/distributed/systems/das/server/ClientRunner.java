@@ -67,10 +67,13 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             System.out.println("playerID: "+playerID);      
             
             ClientRunner runner = new ClientRunner();
-            String serverID = "123";
-            Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
-            System.out.println(Arrays.toString(remoteRegistry.list()));
-            IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
+			Registry remoteRegistry = LocateRegistry.getRegistry ("localhost", 5001);
+			System.out.println (Arrays.toString (remoteRegistry.list ()));
+			String serverID = Arrays.stream (remoteRegistry.list ())
+					.filter (s -> s.contains ("server"))
+					.findFirst ()
+					.orElse ("");
+			IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
             remoteRegistry.bind(playerID, runner);
 
             Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
