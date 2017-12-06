@@ -263,4 +263,8 @@ public class GameState implements IMessageReceivedHandler {
     public Message onMessageReceived(Message event) {
         return execute(event);
     }
+
+    public void setBattlefield(BattleField battlefield) {
+        this.battleField = battlefield;
+    }
 }
