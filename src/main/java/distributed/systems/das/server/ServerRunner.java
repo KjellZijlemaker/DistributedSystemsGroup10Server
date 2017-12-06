@@ -1,24 +1,15 @@
 package distributed.systems.das.server;
 
-import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
-import distributed.systems.das.server.Interfaces.RMISendToUserInterface;
-import distributed.systems.das.server.Services.Callback;
 import distributed.systems.das.server.Services.HeartbeatService;
 import distributed.systems.das.server.Services.MessageBroker;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.State.TrailingStateSynchronization;
 import distributed.systems.das.server.Units.Dragon;
-import distributed.systems.das.server.Units.Unit;
-import distributed.systems.das.server.events.Event;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
 
-import java.rmi.ConnectException;
 import java.rmi.Naming;
-import java.rmi.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class ServerRunner {
@@ -51,7 +42,7 @@ public class ServerRunner {
         for (int i = 0; i < DRAGON_COUNT; i++) {
             Dragon localDragon = new Dragon(UUID.randomUUID().toString());
 
-            if(localGameState.populateDragon(localDragon)){
+			if (tss.populateDragon (localDragon)) {
 
                 /* Awaken the dragon */
                 new Thread(localDragon).start();

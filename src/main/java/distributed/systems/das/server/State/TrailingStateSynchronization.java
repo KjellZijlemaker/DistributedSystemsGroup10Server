@@ -1,6 +1,7 @@
 package distributed.systems.das.server.State;
 
 import distributed.systems.das.server.Interfaces.IMessageReceivedHandler;
+import distributed.systems.das.server.Units.Dragon;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
 import distributed.systems.das.server.util.AlreadyRunningException;
@@ -54,6 +55,10 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 		}
 		this.notify.subscribe (this);
 //		wishList.registerListener (this);
+	}
+
+	public boolean populateDragon (Dragon dragon) {
+		return getState (0).populateDragon (dragon);
 	}
 
 	/**
