@@ -8,6 +8,8 @@ import distributed.systems.das.server.events.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Random;
 
 /**
@@ -67,6 +69,17 @@ public class GameState implements IMessageReceivedHandler {
         Message response = new Message(message);
         response.body.put("battlefield", this.getBattleField());
         response.body.put("unit", remotePlayer);
+
+        System.out.println ("New user logged in. " + remotePlayer.getUnitID ());
+        try {
+            Registry reg = LocateRegistry.getRegistry ("localhost", 5001);
+            System.out.println (reg.list ());
+            IMessageReceivedHandler player = (IMessageReceivedHandler) reg.lookup (remotePlayer.getUnitID ());
+            player.onMessageReceived (response);
+        } catch (Exception e) {
+            e.printStackTrace ();
+        }
+
         return response;
     }
 
@@ -128,19 +141,44 @@ public class GameState implements IMessageReceivedHandler {
         disconnectUser(unit);
     }
 
+    private void notifyClients (Message message) {
+        try {
+            Registry reg = LocateRegistry.getRegistry ("localhost", 5001);
+            for (int i = 1; i < reg.list ().length; ++i) {
+                IMessageReceivedHandler player =
+                        (IMessageReceivedHandler) reg.lookup (reg.list
+                                ()[i]);
+                player.onMessageReceived (message);
+            }
+        } catch (Exception e) {
+            e.printStackTrace ();
+        }
+
+    }
+
     synchronized Message execute(Message message) {
-//		eventList.add (message);
+        eventList.add (message);
         switch (message.type) {
             case Message.LOGIN:
+                Log.debug ("LOGIN EVENT");
                 return connectUser(message);
             case Message.ATTACK:
+                int x = (Integer) message.body.get ("x");
+                int y = (Integer) message.body.get ("y");
+                Unit unit = battleField.getUnit (x, y);
                 battleField.attack(message);
+                if (unit.isDead () && unit.getType () == Unit.PLAYER) {
+                    message.body.put ("isDead", true);
+                }
+                notifyClients (message);
                 break;
             case Message.HEAL:
                 battleField.heal(message);
+                notifyClients (message);
                 break;
             case Message.MOVE:
                 battleField.move(message);
+                notifyClients (message);
                 break;
         }
         return new Message(message); // TODO return proper message

@@ -22,4 +22,8 @@ public class Player extends Unit{
     	System.out.println("---End Status---");
     }
 
+	public int getType () {
+		return PLAYER;
+	}
+
 }

@@ -31,6 +31,9 @@ public abstract class Unit implements Serializable {
 	// Identifier of the unit
 	private String unitID;
 
+	public static final int DRAGON = 0;
+	public static final int PLAYER = 1;
+
 	public enum Direction {
 		up, right, down, left
 	}
@@ -38,6 +41,8 @@ public abstract class Unit implements Serializable {
 	public enum UnitType {
 		player, dragon, undefined,
 	}
+
+	public abstract int getType ();
 
 	/**
 	 * Create a new unit and specify the

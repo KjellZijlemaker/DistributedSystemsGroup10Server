@@ -34,9 +34,9 @@ public class BattleField implements Serializable {
             this.units = new ArrayList<Unit>();
         }
     }
-    
-    public boolean isLegalCoordinates(int x, int y) {
-    	return x>-1 && x<MAP_WIDTH && y>-1 && y<MAP_HEIGHT;
+
+    public synchronized boolean isLegalCoordinates (int x, int y) {
+        return x>-1 && x<MAP_WIDTH && y>-1 && y<MAP_HEIGHT;
     }
 
     private BattleField(int width, int height, Unit[][] map, ArrayList<Unit> units) {
@@ -127,7 +127,7 @@ public class BattleField implements Serializable {
      * @return the unit at the specified position, or return
      * null if there is no unit at that specific position.
      */
-    public Unit getUnit(int x, int y) {
+    public synchronized Unit getUnit (int x, int y) {
         assert x >= 0 && x < map.length;
         assert y >= 0 && x < map[0].length;
 
@@ -195,6 +195,7 @@ public class BattleField implements Serializable {
         Unit unit = this.getUnit(x, y);
         if (unit != null) {
             unit.adjustHitPoints(-(Integer) message.body.get("damage"));
+            System.out.println ("Is dead: " + unit.isDead ());
             if (unit.isDead()) removeUnit(x, y);
         }
     }

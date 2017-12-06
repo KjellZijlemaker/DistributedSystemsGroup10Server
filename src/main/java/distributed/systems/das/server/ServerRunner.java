@@ -5,14 +5,11 @@ import distributed.systems.das.server.Services.ClientPlayHandler;
 import distributed.systems.das.server.Services.HeartbeatService;
 import distributed.systems.das.server.Services.MessageBroker;
 import distributed.systems.das.server.Services.ServerHandler;
-import distributed.systems.das.server.State.BattleField;
 import distributed.systems.das.server.State.GameState;
 import distributed.systems.das.server.State.TrailingStateSynchronization;
 import distributed.systems.das.server.Units.Dragon;
 import distributed.systems.das.server.events.EventList;
 import distributed.systems.das.server.events.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
@@ -22,7 +19,8 @@ import java.rmi.registry.LocateRegistry;
 import java.util.UUID;
 
 public class ServerRunner {
-    private final static String serverID = "server-"+UUID.randomUUID().toString();
+
+    private final static String serverID = "server-" + UUID.randomUUID ().toString ();
     private static final int DRAGON_COUNT = 20;
     private final MessageBroker broker = new MessageBroker();
     private ServerHandler serverHandler;
@@ -38,6 +36,8 @@ public class ServerRunner {
         int otherServerPort = Integer.parseInt(args[1]);
         connectToOtherServer(otherServerPort, myPort);
     }
+
+    private static TrailingStateSynchronization tss;
 
     public static void main(String args[]) throws Exception {
         ServerRunner runner = new ServerRunner(args);
@@ -74,7 +74,7 @@ public class ServerRunner {
 			if (tss.populateDragon (localDragon)) {
 
                 /* Awaken the dragon */
-//                new Thread(localDragon).start();
+                new Thread (localDragon).start ();
             }
 
         }
@@ -92,6 +92,10 @@ public class ServerRunner {
         broker.registerListener(Message.HEAL, clientPlayHandler);
         broker.registerListener(Message.MOVE, clientPlayHandler);
 
+    }
+
+    public static TrailingStateSynchronization getTSS () {
+        return tss;
     }
 
 }

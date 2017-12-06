@@ -13,7 +13,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Implementation of the TSS algorithm. Use the TSSBuilder class to instantiate.
  */
-public class TrailingStateSynchronization implements Notify.Listener, IMessageReceivedHandler {
+public class TrailingStateSynchronization implements Notify.Listener,
+		IMessageReceivedHandler {
 
 	static final Logger Log = LoggerFactory.getLogger (TrailingStateSynchronization.class);
 
@@ -62,7 +63,13 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	}
 
 	public boolean populateDragon (Dragon dragon) {
-		return getState (0).populateDragon (dragon);
+		for (GameState state : states) {
+			boolean result = state.populateDragon (dragon);
+			if (!result) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -87,15 +94,12 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	 * @return false if no more events left to execute
 	 */
 	public synchronized Message executeEvent (Message event) {
-		Log.debug("Executing event");
 		int i = 1;
 		GameState beforeState = GameState.clone (getState (0));
 		GameState afterState = getState (0);
 
 		// Execute the command in the leading game state
 		Message returnValue = afterState.execute (event);
-		
-		Log.debug("Unit x coordinate: " + afterState.getBattleField().getUnit("test").getX () + ", Type:" + event.type);
 
 		Notify.Listener listener = new EventActionListener (i, beforeState, afterState,
 															event);
@@ -130,6 +134,14 @@ public class TrailingStateSynchronization implements Notify.Listener, IMessageRe
 	@Override
 	public Message onMessageReceived (Message event) {
 		return executeEvent (event);
+	}
+
+	public IMessageReceivedHandler getHandler () {
+		return this;
+	}
+
+	public BattleField getLeadingBattleField () {
+		return getState (0).getBattleField ();
 	}
 
 	private class EventActionListener implements Notify.Listener {
