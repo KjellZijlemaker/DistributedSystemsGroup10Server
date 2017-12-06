@@ -16,7 +16,7 @@ import java.rmi.RemoteException;
  * @author Pieter Anemaet, Boaz Pat-El
  */
 public abstract class Unit implements Serializable {
-	private static final long serialVersionUID = -4550572524008491160L;
+	private static final long serialVersionUID = 1000L;
 
 	// Position of the unit
 	protected int x, y;
