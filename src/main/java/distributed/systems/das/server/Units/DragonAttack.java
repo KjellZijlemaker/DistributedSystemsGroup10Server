@@ -36,7 +36,7 @@ public class DragonAttack implements DragonListener, Serializable {
 //									.getType ())));
 					if (battleField.getUnit (i, j).getType () == Unit
 							.PLAYER) {
-						System.out.println ("FOUND A PLAYER!");
+						System.out.println ("Dragon attacks player at "+i+","+j);
 						Player player = new Player (10, 10, battleField.getUnit(i, j).getUnitID());
 						player.setPosition (i, j);
 						adjacentPlayers.add (player);
