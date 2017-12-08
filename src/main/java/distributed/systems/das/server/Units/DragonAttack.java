@@ -19,6 +19,8 @@ public class DragonAttack implements DragonListener, Serializable {
 		ArrayList<Player> adjacentPlayers = new ArrayList<> ();
 		TrailingStateSynchronization tss = ServerRunner.getTSS ();
 		BattleField battleField = tss.getLeadingBattleField ();
+
+
 		for (int i = (x - 2); i <= (x + 2); ++i) {
 			for (int j = (y - 2); j <= (y + 2); ++j) {
 //				if (Math.abs(x - i) + Math.abs(j - y) > 2) {
@@ -35,7 +37,7 @@ public class DragonAttack implements DragonListener, Serializable {
 					if (battleField.getUnit (i, j).getType () == Unit
 							.PLAYER) {
 						System.out.println ("FOUND A PLAYER!");
-						Player player = new Player (10, 10, "null");
+						Player player = new Player (10, 10, battleField.getUnit(i, j).getUnitID());
 						player.setPosition (i, j);
 						adjacentPlayers.add (player);
 						break;

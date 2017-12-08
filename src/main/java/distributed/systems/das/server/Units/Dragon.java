@@ -28,7 +28,8 @@ public class Dragon extends Unit implements Runnable{
 		 * 50..100 and 5..20 attackpoints. */
 		super ((int) (Math.random () * (MAX_HITPOINTS - MIN_HITPOINTS) + MIN_HITPOINTS), (int) (Math.random () * (MAX_ATTACKPOINTS - MIN_ATTACKPOINTS) + MIN_ATTACKPOINTS), UUID);
 
-		DragonAttack dragonAttack = new DragonAttack (this);
+		new DragonAttack (this);
+
 
 		/* Create a random delay */
 		timeBetweenTurns = (int) (Math.random () * (MAX_TIME_BETWEEN_TURNS - MIN_TIME_BETWEEN_TURNS)) + MIN_TIME_BETWEEN_TURNS;

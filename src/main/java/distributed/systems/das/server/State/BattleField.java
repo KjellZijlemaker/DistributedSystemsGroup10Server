@@ -209,11 +209,11 @@ public class BattleField implements Serializable {
         }
     }
 
-    public void move(Message message) {
+    public boolean move(Message message) {
         int x = (Integer) message.body.get("x");
         int y = (Integer) message.body.get("y");
         Unit unit = getUnit(message.actorID);
-        moveUnit(unit, x, y);
+        return moveUnit(unit, x, y);
     }
 
     @Override

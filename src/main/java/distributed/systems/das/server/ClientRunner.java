@@ -290,11 +290,15 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
 		//System.out.println(m.body.toString());
 		Message resp_m = server.onMessageReceived(m);
-//		battlefield.move(resp_m);
+		if((Boolean) resp_m.body.get("move")){
+			System.out.println ("try find and move res:" + true);
+			p.logStatus ();
+			return true;
+		}
 
-		System.out.println ("try find and move res:" + true);
-		p.logStatus ();
-		return true;
+		return false;
+
+
 	}
 
 

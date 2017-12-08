@@ -177,7 +177,12 @@ public class GameState implements IMessageReceivedHandler {
                 notifyClients (message);
                 break;
             case Message.MOVE:
-                battleField.move(message);
+                if(battleField.move(message)){
+                    message.body.put ("move", true);
+                }
+                else{
+                    message.body.put ("move", false);
+                }
                 notifyClients (message);
                 break;
         }

@@ -57,7 +57,7 @@ public class ServerRunner {
         HeartbeatService heartbeatService = new HeartbeatService(localGameState);
         new Thread(heartbeatService).start();
 
-        TrailingStateSynchronization tss =
+        tss =
                 new TrailingStateSynchronization.TSSBuilder (localGameState)
                         .setDelayInterval (100)
                         .setDelays (3)
@@ -88,9 +88,9 @@ public class ServerRunner {
         broker.registerListener (Message.LOGIN, tss);
         broker.registerListener (Message.HEARTBEAT, tss);
         broker.registerListener (Message.HANDSHAKE, serverHandler);
-        broker.registerListener(Message.ATTACK, clientPlayHandler);
-        broker.registerListener(Message.HEAL, clientPlayHandler);
-        broker.registerListener(Message.MOVE, clientPlayHandler);
+//        broker.registerListener(Message.ATTACK, clientPlayHandler);
+//        broker.registerListener(Message.HEAL, clientPlayHandler);
+//        broker.registerListener(Message.MOVE, clientPlayHandler);
 
     }
 
