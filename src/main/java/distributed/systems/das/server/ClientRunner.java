@@ -29,8 +29,8 @@ import java.util.UUID;
 public class ClientRunner extends UnicastRemoteObject implements IMessageReceivedHandler {
 
     static final Logger Log = LoggerFactory.getLogger(ClientRunner.class);
-	private static BattleField battleField;
-	private volatile boolean alive = true;
+    private static BattleField battleField;
+    private volatile boolean alive = true;
 
     protected ClientRunner() throws RemoteException {
         super();
@@ -44,10 +44,10 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         String playerID = UUID.randomUUID().toString();
 
         // Create list with servers
-        java.util.List<Map.Entry<String, Integer>> servers = new java.util.ArrayList<>();
-        servers.add(new java.util.AbstractMap.SimpleEntry<>("localhost", 5001));
-
-        Map.Entry<String, Integer> randomServer = servers.get(new Random().nextInt(servers.size()));
+//        java.util.List<Map.Entry<String, Integer>> servers = new java.util.ArrayList<>();
+//        servers.add(new java.util.AbstractMap.SimpleEntry<>("localhost", 5001));
+//
+//        Map.Entry<String, Integer> randomServer = servers.get(new Random().nextInt(servers.size()));
 
         /**
          * Set bot ID and total time before disconnecting bot from server
@@ -61,30 +61,29 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
 //        Unit localPlayer = new Player(10, 10, playerID);
 
-
         Callback updateClient = new Callback();
         try {
-            
+
             ClientRunner runner = new ClientRunner();
-			Registry remoteRegistry = LocateRegistry.getRegistry ("localhost", 5001);
-			System.out.println (Arrays.toString (remoteRegistry.list ()));
-			String serverID = Arrays.stream (remoteRegistry.list ())
-					.filter (s -> s.contains ("server"))
-					.findFirst ()
-					.orElse ("");
-			IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
+            Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
+            System.out.println(Arrays.toString(remoteRegistry.list()));
+            String serverID = Arrays.stream(remoteRegistry.list())
+                    .filter(s -> s.contains("server"))
+                    .findFirst()
+                    .orElse("");
+            IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
             remoteRegistry.bind(playerID, runner);
 
             Message m = new Message(0, System.currentTimeMillis(), playerID, Message.LOGIN);
             Message loginResp = server.onMessageReceived(m);
-            Unit u = (Unit)loginResp.body.get("unit");
-			Player p = (Player) u;
-            System.out.println("playerID: "+playerID+" spawned at "+p.getX()+","+p.getY());
-			
-			battleField = (BattleField) loginResp.body.get ("battlefield");			
+            Unit u = (Unit) loginResp.body.get("unit");
+            Player p = (Player) u;
+            System.out.println("playerID: " + playerID + " spawned at " + p.getX() + "," + p.getY());
+
+            battleField = (BattleField) loginResp.body.get("battlefield");
 
             /*for (int i=0; i<BattleField.MAP_WIDTH; i++) {
-        		for (int j=0; j<BattleField.MAP_HEIGHT; j++) {
+                for (int j=0; j<BattleField.MAP_HEIGHT; j++) {
 
 					Unit u2 = battleField.getUnit (i, j);
 					if (!(u2 instanceof Dragon)) {
@@ -95,22 +94,22 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
         		}
         	}*/
-                        
-			runner.startSimulation (server, p);
 
-			//runner.startHeartbeat(server, playerID);
+            runner.startSimulation(server, p);
+
+            //runner.startHeartbeat(server, playerID);
 
             /**
              * Start heartbeat thread
              */
-            String finalPlayerID = playerID;
-            new Thread(() -> {
-                try {
-                    runner.startHeartbeat(server, finalPlayerID);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
+//            String finalPlayerID = playerID;
+//            new Thread(() -> {
+//                try {
+//                    runner.startHeartbeat(server, finalPlayerID);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }).start();
 
 
             /**
@@ -137,207 +136,207 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         }
 
     }
-    
+
     private boolean findAndHeal(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-		//System.out.println ("try find and heal");
+        //System.out.println ("try find and heal");
 
-		int nx = p.getX();
-    	int ny = p.getY();
-    	
-    	int tx = -1;
-		int ty = -1;
-		
-		boolean found = false;
+        int nx = p.getX();
+        int ny = p.getY();
 
-    	for (int i=-5; i<=5; i++) {
-    		for (int j=-5; j<=5; j++) {
-    			if (Math.abs(i) + Math.abs(j) > 5) {
-    				continue;
-    			}
-    			
-    			tx = nx + i;
-    			ty = ny + j;
+        int tx = -1;
+        int ty = -1;
 
-    			if (!battlefield.isLegalCoordinates(tx, ty)) {
-    				continue;
-    			}
-    			
-    			Unit u = battlefield.getUnit(tx, ty);
-    			
-    			if (!(u instanceof Player)) {
-    				continue;
-    			}
-    			
-    			Player tp = (Player)u;
-    			if (tp.getHitPoints() <= tp.getMaxHitPoints() / 2) {
-    				Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.HEAL);
-    				m.body.put("x", tx);
-    				m.body.put("y", ty);
-    				m.body.put("healed", p.getAttackPoints());
-    					
-    				Message resp_m = server.onMessageReceived(m);
-    				battlefield.heal(resp_m);
-    				
-    				found = true;
-        			break;
-    			}
-    		}
-    		
-    		if (found) {
-    			break;
-    		}
-    	}
+        boolean found = false;
 
-		System.out.println ("Player "+p.getUnitID()+" tries to find and heal:" + found);
-		if (found) p.logStatus ();
-		return found;
+        for (int i = -5; i <= 5; i++) {
+            for (int j = -5; j <= 5; j++) {
+                if (Math.abs(i) + Math.abs(j) > 5) {
+                    continue;
+                }
+
+                tx = nx + i;
+                ty = ny + j;
+
+                if (!battlefield.isLegalCoordinates(tx, ty)) {
+                    continue;
+                }
+
+                Unit u = battlefield.getUnit(tx, ty);
+
+                if (!(u instanceof Player)) {
+                    continue;
+                }
+
+                Player tp = (Player) u;
+                if (tp.getHitPoints() <= tp.getMaxHitPoints() / 2) {
+                    Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.HEAL);
+                    m.body.put("x", tx);
+                    m.body.put("y", ty);
+                    m.body.put("healed", p.getAttackPoints());
+
+                    Message resp_m = server.onMessageReceived(m);
+                    battlefield.heal(resp_m);
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                break;
+            }
+        }
+
+        System.out.println("Player " + p.getUnitID() + " tries to find and heal:" + found);
+        if (found) p.logStatus();
+        return found;
     }
-    
+
     private boolean directlyAttack(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-		//System.out.println ("try directly attack");
-		int nx = p.getX();
-    	int ny = p.getY();
-    	
-    	int tx = -1;
-		int ty = -1;
-		
-		boolean found = false;
+        //System.out.println ("try directly attack");
+        int nx = p.getX();
+        int ny = p.getY();
 
-    	for (int i=-2; i<=2; i++) {
-    		for (int j=-2; j<=2; j++) {
-    			if (Math.abs(i) + Math.abs(j) > 2) {
-    				continue;
-    			}
-    			
-    			tx = nx + i;
-    			ty = ny + j;
+        int tx = -1;
+        int ty = -1;
 
-    			if (!battlefield.isLegalCoordinates(tx, ty)) {
-    				continue;
-    			}
+        boolean found = false;
 
-    			Unit u = battlefield.getUnit(tx, ty);
-    			
-    			if (!(u instanceof Dragon)) {
-    				continue;
-    			}
-    			
-    			Dragon td = (Dragon)u;
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                if (Math.abs(i) + Math.abs(j) > 2) {
+                    continue;
+                }
 
-    			Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
-    			m.body.put("x", tx);
-    			m.body.put("y", ty);
-    			m.body.put("damage", p.getAttackPoints());
-    					
-    			Message resp_m = server.onMessageReceived(m);
+                tx = nx + i;
+                ty = ny + j;
 
-    			found = true;
-    			break;
-    		}
-    		
-    		if (found) {
-    			break;
-    		}
-    	}
+                if (!battlefield.isLegalCoordinates(tx, ty)) {
+                    continue;
+                }
 
-		System.out.println ("Player "+p.getUnitID()+" tries to attack dragon in range:" + found);
-		if (found) p.logStatus ();
-		return found;
+                Unit u = battlefield.getUnit(tx, ty);
+
+                if (!(u instanceof Dragon)) {
+                    continue;
+                }
+
+                Dragon td = (Dragon) u;
+
+                Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
+                m.body.put("x", tx);
+                m.body.put("y", ty);
+                m.body.put("damage", p.getAttackPoints());
+
+                Message resp_m = server.onMessageReceived(m);
+
+                found = true;
+                break;
+            }
+
+            if (found) {
+                break;
+            }
+        }
+
+        System.out.println("Player " + p.getUnitID() + " tries to attack dragon in range:" + found);
+        if (found) p.logStatus();
+        return found;
     }
 
     private boolean findNearestDragonAndMove(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-    	int nx = p.getX();
-    	int ny = p.getY();
-		System.out.println ("Try to find a dragon and move. Current coordinates: " + nx + "," + ny);
+        int nx = p.getX();
+        int ny = p.getY();
+        System.out.println("Try to find a dragon and move. Current coordinates: " + nx + "," + ny);
 
-		int nd = 0x7fffffff;
-    	int tx=-1, ty=-1;
-		
-    	for (int i=0; i<BattleField.MAP_WIDTH; i++) {
-    		for (int j=0; j<BattleField.MAP_HEIGHT; j++) {
-	
-				Unit u = battlefield.getUnit(i, j);
-				if (!(u instanceof Dragon)) {
-					continue;
-				}
+        int nd = 0x7fffffff;
+        int tx = -1, ty = -1;
 
-				int distance = (Math.abs(nx-i) + Math.abs(ny-j));
-				if (distance < nd) {
-					nd = distance;
-					tx = i;
-					ty = j;
-				}
+        for (int i = 0; i < BattleField.MAP_WIDTH; i++) {
+            for (int j = 0; j < BattleField.MAP_HEIGHT; j++) {
 
-    		}
-    	}
+                Unit u = battlefield.getUnit(i, j);
+                if (!(u instanceof Dragon)) {
+                    continue;
+                }
 
+                int distance = (Math.abs(nx - i) + Math.abs(ny - j));
+                if (distance < nd) {
+                    nd = distance;
+                    tx = i;
+                    ty = j;
+                }
 
-		if (tx == -1 && ty == -1) {
-			return false;
-		}
-
-		int mx=nx, my=ny;
-    	if (tx != nx) {
-    		mx += (tx-nx)/Math.abs(tx-nx);
-    	} else {
-    		my += (ty-ny)/Math.abs(ty-ny);
-    	}
-    	Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
-		m.body.put("x", mx);
-		m.body.put("y", my);
-		Message resp_m = server.onMessageReceived(m);
-		if((Boolean) resp_m.body.get("move")){
-			System.out.println ("Player "+p.getUnitID()+" tries to move from "+nx+","+ny+" to " + mx + "," + my +" to attack dragon at "+tx +","+ ty+" (distance "+nd+"):"+true);
-			p.logStatus ();
-			return true;
-		}
-
-		return false;
+            }
+        }
 
 
-	}
+        if (tx == -1 && ty == -1) {
+            return false;
+        }
+
+        int mx = nx, my = ny;
+        if (tx != nx) {
+            mx += (tx - nx) / Math.abs(tx - nx);
+        } else {
+            my += (ty - ny) / Math.abs(ty - ny);
+        }
+        Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
+        m.body.put("x", mx);
+        m.body.put("y", my);
+        Message resp_m = server.onMessageReceived(m);
+        if ((Boolean) resp_m.body.get("move")) {
+            System.out.println("Player " + p.getUnitID() + " tries to move from " + nx + "," + ny + " to " + mx + "," + my + " to attack dragon at " + tx + "," + ty + " (distance " + nd + "):" + true);
+            p.logStatus();
+            return true;
+        }
+
+        return false;
 
 
-	private void startSimulation (IMessageReceivedHandler server, Player p) throws ActionFailedException {
-		Random random = new Random();
-    	
-    	try {
-			while (alive) {
-				boolean action = findAndHeal (server, p, battleField)
-						|| directlyAttack (server, p, battleField)
-						|| findNearestDragonAndMove (server, p, battleField);
-
-				if (!action) {
-	    			throw new ActionFailedException();
-	    		}
-	    		
-	    		Thread.sleep(1000);
-	    	}
-			System.out.println("Player "+p.getUnitID()+" is dead!");
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
     }
-    			
+
+
+    private void startSimulation(IMessageReceivedHandler server, Player p) throws ActionFailedException {
+        Random random = new Random();
+
+        try {
+            while (alive) {
+                boolean action = findAndHeal(server, p, battleField)
+                        || directlyAttack(server, p, battleField)
+                        || findNearestDragonAndMove(server, p, battleField);
+
+                if (!action) {
+                    throw new ActionFailedException();
+                }
+
+                Thread.sleep(1000);
+            }
+            System.out.println("Player " + p.getUnitID() + " is dead!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Message onMessageReceived(Message message) {
-		Log.debug (message.body.toString ());
-		if (message.body.containsKey ("isDead")) {
-			alive = false;
-			return null;
-		}
-		switch (message.type) {
-			case Message.ATTACK:
-				battleField.attack (message);
-				break;
-			case Message.HEAL:
-				battleField.heal (message);
-				break;
-			case Message.MOVE:
-				battleField.move (message);
-				break;
-		}
-		return null;
+        Log.debug(message.body.toString());
+        if (message.body.containsKey("isDead")) {
+            alive = false;
+            return null;
+        }
+        switch (message.type) {
+            case Message.ATTACK:
+                battleField.attack(message);
+                break;
+            case Message.HEAL:
+                battleField.heal(message);
+                break;
+            case Message.MOVE:
+                battleField.move(message);
+                break;
+        }
+        return null;
     }
 
     private void startHeartbeat(IMessageReceivedHandler server, String playerID) throws Exception {
