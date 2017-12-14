@@ -23,7 +23,7 @@
                     <finalName>server</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>distributed.systems.das.server.Core</mainClass>
+                            <mainClass>distributed.systems.das.server.ServerRunner</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -33,4 +33,18 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+    </dependencies>
+
 </project>

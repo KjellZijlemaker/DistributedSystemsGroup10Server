@@ -1,7 +1,7 @@
 package distributed.systems.das.server.events;
 
 public class Heal extends Event {
-
+	private static long serialVersionUID = 1L;
 	private int targetX, targetY;
 	private int amount;
 
@@ -12,7 +12,7 @@ public class Heal extends Event {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	private Heal (long id, long timestamp, int actor_id,
+	private Heal (long id, long timestamp, String actor_id,
 				  int targetX, int targetY, int amount) {
 		super (id, timestamp, actor_id);
 		this.targetX = targetX;
@@ -54,7 +54,7 @@ public class Heal extends Event {
 		private int targetX, targetY;
 		private long id;
 		private long timestamp;
-		private int actor_id;
+		private String actor_id;
 		private int amount;
 
 		public HealBuilder (long id) {
@@ -65,48 +65,54 @@ public class Heal extends Event {
 			return targetX;
 		}
 
-		public void setTargetX (int targetX) {
+		public HealBuilder setTargetX (int targetX) {
 			this.targetX = targetX;
+			return this;
 		}
 
 		public int getTargetY () {
 			return targetY;
 		}
 
-		public void setTargetY (int targetY) {
+		public HealBuilder setTargetY (int targetY) {
 			this.targetY = targetY;
+			return this;
 		}
 
 		public long getId () {
 			return id;
 		}
 
-		public void setId (long id) {
+		public HealBuilder setId (long id) {
 			this.id = id;
+			return this;
 		}
 
 		public long getTimestamp () {
 			return timestamp;
 		}
 
-		public void setTimestamp (long timestamp) {
+		public HealBuilder setTimestamp (long timestamp) {
 			this.timestamp = timestamp;
+			return this;
 		}
 
-		public int getActor_id () {
+		public String getActor_id () {
 			return actor_id;
 		}
 
-		public void setActor_id (int actor_id) {
+		public HealBuilder setActor_id (String actor_id) {
 			this.actor_id = actor_id;
+			return this;
 		}
 
 		public int getAmount () {
 			return amount;
 		}
 
-		public void setAmount (int amount) {
+		public HealBuilder setAmount (int amount) {
 			this.amount = amount;
+			return this;
 		}
 
 		public Heal createEvent () {

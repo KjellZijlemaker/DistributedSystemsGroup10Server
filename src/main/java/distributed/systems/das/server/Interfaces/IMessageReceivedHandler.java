@@ -1,9 +1,11 @@
 package distributed.systems.das.server.Interfaces;
 
-import distributed.systems.das.server.Beans.User;
-import distributed.systems.das.server.events.Event;
+import distributed.systems.das.server.events.Message;
 
-public interface IMessageReceivedHandler {
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-    void onMessageReceived(Event event);
+public interface IMessageReceivedHandler extends Remote {
+
+    Message onMessageReceived(Message event) throws RemoteException;
 }

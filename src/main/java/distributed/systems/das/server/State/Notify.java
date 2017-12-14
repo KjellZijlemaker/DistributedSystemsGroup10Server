@@ -1,7 +1,6 @@
 package distributed.systems.das.server.State;
 
 import distributed.systems.das.server.util.AlreadyRunningException;
-import distributed.systems.das.server.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,7 +46,6 @@ public class Notify implements Runnable {
 			try {
 				Thread.sleep (tickRate);
 			} catch (InterruptedException e) {
-				Log.throwException (e, this.getClass ());
 				// TODO: recover from this?
 			}
 			updateTime ();

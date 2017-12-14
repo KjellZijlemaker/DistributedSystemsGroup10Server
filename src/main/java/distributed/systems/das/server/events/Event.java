@@ -12,10 +12,13 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	public static final int ATTACK = 1;
 	public static final int HEAL = 2;
 	public static final int MOVE = 3;
+	public static final int HEARTBEAT = 4;
+	public static final int LOGIN = 5;
+
 
 	private long id;
 	private long timestamp;
-	private int actor_id;
+	private String actor_id;
 
 	/**
 	 * Returns type of event
@@ -29,7 +32,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	 * @param timestamp The time when the event occurs
 	 * @param actor_id  The id of the actor that created this event
 	 */
-	public Event (long id, long timestamp, int actor_id) {
+	public Event (long id, long timestamp, String actor_id) {
 		this.id = id;
 		this.timestamp = timestamp;
 		this.actor_id = actor_id;
@@ -51,11 +54,11 @@ public abstract class Event implements Serializable, Comparable<Event> {
 		this.timestamp = timestamp;
 	}
 
-	public int getActor_id () {
+	public String getActor_id () {
 		return actor_id;
 	}
 
-	public void setActor_id (int actor_id) {
+	public void setActor_id (String actor_id) {
 		this.actor_id = actor_id;
 	}
 
@@ -78,7 +81,7 @@ public abstract class Event implements Serializable, Comparable<Event> {
 	public int compareTo (Event event) {
 		int comparison = Long.compare (this.timestamp, event.getTimestamp ());
 		if (comparison == 0) {
-			comparison = Integer.compare (this.actor_id, this.actor_id);
+			comparison = this.actor_id.compareTo(event.getActor_id());
 		}
 		return comparison;
 	}

@@ -9,9 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Queue for all events
  */
-public class EventList implements Iterable<Event>, Serializable {
+public class EventList implements Iterable<Message>, Serializable {
 
-	private CopyOnWriteArrayList<Event> events;
+	private CopyOnWriteArrayList<Message> events;
 
 	/**
 	 * Creates new EventList
@@ -27,11 +27,11 @@ public class EventList implements Iterable<Event>, Serializable {
 		this.events = new CopyOnWriteArrayList<> (toCopy.getEvents ());
 	}
 
-	public synchronized boolean add (Event event) {
+	public synchronized boolean add (Message event) {
 		return this.events.add (event);
 	}
 
-	public synchronized void add (int index, Event event) {
+	public synchronized void add (int index, Message event) {
 		this.events.add (index, event);
 	}
 
@@ -46,7 +46,7 @@ public class EventList implements Iterable<Event>, Serializable {
 	/**
 	 * Returns all events
 	 */
-	public synchronized CopyOnWriteArrayList<Event> getEvents () {
+	public synchronized CopyOnWriteArrayList<Message> getEvents () {
 		return this.events;
 	}
 
@@ -55,11 +55,11 @@ public class EventList implements Iterable<Event>, Serializable {
 	 * @param from oldest
 	 * @param to most recent
 	 */
-	public synchronized CopyOnWriteArrayList<Event> getEventsByTime (long from, long to) {
-		CopyOnWriteArrayList<Event> newList = new CopyOnWriteArrayList<>();
-	    for (Event event : events) {
-	    	long timestamp = event.getTimestamp();
-	    	if (timestamp >= from && timestamp < to) {
+	public synchronized CopyOnWriteArrayList<Message> getEventsByTime (long from, long to) {
+		CopyOnWriteArrayList<Message> newList = new CopyOnWriteArrayList<> ();
+		for (Message event : events) {
+			long timestamp = event.timestamp;
+			if (timestamp >= from && timestamp < to) {
 	    		newList.add(event);
 			}
 		}
@@ -73,14 +73,14 @@ public class EventList implements Iterable<Event>, Serializable {
 	/**
 	 * Returns the top element and removes it.
 	 */
-	public synchronized Event pop () {
-		Event event = events.get (0);
+	public synchronized Message pop () {
+		Message event = events.get (0);
 		events.remove (0);
 		return event;
 	}
 
 	@Override
-	public Iterator<Event> iterator () {
+	public Iterator<Message> iterator () {
 		return this.events.iterator ();
 	}
 
@@ -105,8 +105,8 @@ public class EventList implements Iterable<Event>, Serializable {
 			return false;
 		}
 
-		ArrayList<Event> x = new ArrayList<> (this.events);
-		ArrayList<Event> y = new ArrayList<> (list.getEvents ());
+		ArrayList<Message> x = new ArrayList<> (this.events);
+		ArrayList<Message> y = new ArrayList<> (list.getEvents ());
 
 		Collections.sort (x);
 		Collections.sort (y);
