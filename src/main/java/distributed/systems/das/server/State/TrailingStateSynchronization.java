@@ -63,11 +63,19 @@ public class TrailingStateSynchronization implements Notify.Listener,
 	}
 
 	public boolean populateDragon (Dragon dragon) {
-		for (GameState state : states) {
-			boolean result = state.populateDragon (dragon);
-			if (!result) {
-				return false;
-			}
+//		for (GameState state : states) {
+//			System.out.println(state.toString());
+//			boolean result = state.populateDragon (dragon);
+//			if (!result) {
+//				return false;
+//			}
+//		}
+
+
+		GameState state = getState(0);
+		boolean result = state.populateDragon (dragon);
+		if (!result) {
+			return false;
 		}
 		return true;
 	}
@@ -94,6 +102,9 @@ public class TrailingStateSynchronization implements Notify.Listener,
 	 * @return false if no more events left to execute
 	 */
 	public synchronized Message executeEvent (Message event) {
+		System.out.println("in TSS executeEvent");
+		System.out.println(event.body.toString());
+
 		int i = 1;
 		GameState beforeState = GameState.clone (getState (0));
 		GameState afterState = getState (0);

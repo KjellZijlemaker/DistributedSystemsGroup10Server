@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -71,14 +72,6 @@ public class GameState implements IMessageReceivedHandler {
         response.body.put("unit", remotePlayer);
 
         System.out.println ("New user logged in. " + remotePlayer.getUnitID ());
-        try {
-            Registry reg = LocateRegistry.getRegistry ("localhost", 5001);
-            System.out.println (reg.list ());
-            IMessageReceivedHandler player = (IMessageReceivedHandler) reg.lookup (remotePlayer.getUnitID ());
-            player.onMessageReceived (response);
-        } catch (Exception e) {
-            e.printStackTrace ();
-        }
 
         return response;
     }
@@ -109,13 +102,13 @@ public class GameState implements IMessageReceivedHandler {
 
     public boolean populateDragon(Unit localDragon){
 
-			/* Try picking a random spot */
-            int x, y, attempt = 0;
-            do {
-                x = (int) (Math.random() * BattleField.MAP_WIDTH);
-                y = (int) (Math.random() * BattleField.MAP_HEIGHT);
-                attempt++;
-            } while (!battleField.spawnUnit(localDragon, x, y) && attempt < 10);
+        /* Try picking a random spot */
+        int x, y, attempt = 0;
+        do {
+            x = (int) (Math.random() * BattleField.MAP_WIDTH);
+            y = (int) (Math.random() * BattleField.MAP_HEIGHT);
+            attempt++;
+        } while (!battleField.spawnUnit(localDragon, x, y) && attempt < 10);
 
         if (!battleField.getUnit(x, y).getUnitID()
                 .equals(localDragon.getUnitID())) {
@@ -142,9 +135,19 @@ public class GameState implements IMessageReceivedHandler {
     }
 
     private void notifyClients (Message message) {
+        System.out.println("in notify clients");
+        System.out.println("Message actor ID: " + message.actorID);
+        System.out.println(message.body.toString());
         try {
             Registry reg = LocateRegistry.getRegistry ("localhost", 5001);
-            for (int i = 1; i < reg.list ().length; ++i) {
+            System.out.println(Arrays.toString(reg.list()));
+            for (int i = 0; i < reg.list ().length; ++i) {
+                String clientId = reg.list()[i];
+                if (!clientId.contains("client")) {
+                    continue;
+                }
+                System.out.println("try to notify " + clientId);
+
                 IMessageReceivedHandler player =
                         (IMessageReceivedHandler) reg.lookup (reg.list
                                 ()[i]);
@@ -161,7 +164,9 @@ public class GameState implements IMessageReceivedHandler {
         switch (message.type) {
             case Message.LOGIN:
                 Log.debug ("LOGIN EVENT");
-                return connectUser(message);
+                message =  connectUser(message);
+                notifyClients(message);
+                break;
             case Message.ATTACK:
                 int x = (Integer) message.body.get ("x");
                 int y = (Integer) message.body.get ("y");
@@ -177,6 +182,7 @@ public class GameState implements IMessageReceivedHandler {
                 notifyClients (message);
                 break;
             case Message.MOVE:
+                System.out.println("MOVE EVENT");
                 if(battleField.move(message)){
                     message.body.put ("move", true);
                 }

@@ -45,11 +45,14 @@ public class Dragon extends Unit implements Runnable{
 		while (GameState.getRunningState ()) {
 			try {
 				/* Sleep while the dragon is considering its next move */
-				Thread.sleep ((int) (timeBetweenTurns * 1000 * GameState.GAME_SPEED));
+//				Thread.sleep ((int) (timeBetweenTurns * 1000 * GameState.GAME_SPEED));
+				Thread.sleep(3000);
 
 				/* Stop if the dragon runs out of hitpoints */
 				if (getHitPoints () <= 0)
 					break;
+
+				System.out.println("Dragon (" + this.getX() + "," + this.getY() + ") [" + this.getHitPoints() + "] "+ this.getUnitID() + " try to attack");
 
 				this.listener.attack (getX (), getY (), getAttackPoints ());
 			} catch (Exception e) {

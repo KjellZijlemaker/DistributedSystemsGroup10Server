@@ -31,6 +31,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     static final Logger Log = LoggerFactory.getLogger(ClientRunner.class);
     private static BattleField battleField;
     private volatile boolean alive = true;
+    private Player player = null;
 
     protected ClientRunner() throws RemoteException {
         super();
@@ -41,7 +42,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         long end = currentTime + 10000000; // Initial ending time for testing with single player
         double botTime;
 
-        String playerID = UUID.randomUUID().toString();
+        String playerID = "client-" + UUID.randomUUID().toString();
 
         // Create list with servers
 //        java.util.List<Map.Entry<String, Integer>> servers = new java.util.ArrayList<>();
@@ -66,11 +67,15 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
             ClientRunner runner = new ClientRunner();
             Registry remoteRegistry = LocateRegistry.getRegistry("localhost", 5001);
+            System.out.println("remote registry list:");
             System.out.println(Arrays.toString(remoteRegistry.list()));
             String serverID = Arrays.stream(remoteRegistry.list())
                     .filter(s -> s.contains("server"))
                     .findFirst()
                     .orElse("");
+            if ("".equals(serverID)) {
+                throw new Exception("Server RMI instance not found");
+            }
             IMessageReceivedHandler server = (IMessageReceivedHandler) remoteRegistry.lookup(serverID);
             remoteRegistry.bind(playerID, runner);
 
@@ -78,6 +83,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             Message loginResp = server.onMessageReceived(m);
             Unit u = (Unit) loginResp.body.get("unit");
             Player p = (Player) u;
+            runner.player = p;
             System.out.println("playerID: " + playerID + " spawned at " + p.getX() + "," + p.getY());
 
             battleField = (BattleField) loginResp.body.get("battlefield");
@@ -97,40 +103,10 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
             runner.startSimulation(server, p);
 
-            //runner.startHeartbeat(server, playerID);
 
-            /**
-             * Start heartbeat thread
-             */
-//            String finalPlayerID = playerID;
-//            new Thread(() -> {
-//                try {
-//                    runner.startHeartbeat(server, finalPlayerID);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }).start();
-
-
-            /**
-             * Getting updates from server
-             *//*
-            Callback callback = new Callback();
-            while (true){
-                Thread.sleep(200);
-
-                if(callback.getUpdate() != null){
-                    System.out.println(callback.getUpdate());
-                    Message callbackMessage = callback.getUpdate();
-                    switch (callbackMessage.type){
-                        case Message.ATTACK:
-                            System.out.println("Attacked, you have: " + callbackMessage.body.get("adjustedHitpoints"));
-                    }
-
-                }
-
-            }*/
-
+        } catch (ActionFailedException e) {
+            System.out.println("============GAME OVER============");
+            System.out.println("         Players WIN !!!         ");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -138,7 +114,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     }
 
     private boolean findAndHeal(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-        //System.out.println ("try find and heal");
+        System.out.println ("try find and heal");
 
         int nx = p.getX();
         int ny = p.getY();
@@ -151,6 +127,11 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         for (int i = -5; i <= 5; i++) {
             for (int j = -5; j <= 5; j++) {
                 if (Math.abs(i) + Math.abs(j) > 5) {
+                    continue;
+                }
+
+                //player can not heal himself/herself
+                if (i==0 && j==0) {
                     continue;
                 }
 
@@ -173,6 +154,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
                     m.body.put("x", tx);
                     m.body.put("y", ty);
                     m.body.put("healed", p.getAttackPoints());
+                    m.body.put("_from", "client " + p.getUnitID());
 
                     Message resp_m = server.onMessageReceived(m);
                     battlefield.heal(resp_m);
@@ -193,7 +175,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     }
 
     private boolean directlyAttack(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
-        //System.out.println ("try directly attack");
+        System.out.println ("try directly attack");
         int nx = p.getX();
         int ny = p.getY();
 
@@ -221,12 +203,17 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
                     continue;
                 }
 
+//                System.out.println("DDD " + tx + " " + ty + " " + u.getX() + " " +  u.getY());
+// TODO (tx,ty) != (u.getX(),u.getY())
+//                System.out.println("find a dragon " + u.getX() + "," + u.getY());
+
                 Dragon td = (Dragon) u;
 
                 Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.ATTACK);
                 m.body.put("x", tx);
                 m.body.put("y", ty);
                 m.body.put("damage", p.getAttackPoints());
+                m.body.put("_from", "client " + p.getUnitID());
 
                 Message resp_m = server.onMessageReceived(m);
 
@@ -245,6 +232,7 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
     }
 
     private boolean findNearestDragonAndMove(IMessageReceivedHandler server, Player p, BattleField battlefield) throws Exception {
+
         int nx = p.getX();
         int ny = p.getY();
         System.out.println("Try to find a dragon and move. Current coordinates: " + nx + "," + ny);
@@ -270,10 +258,12 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
             }
         }
 
-
         if (tx == -1 && ty == -1) {
+            System.out.println("no dragon found");
             return false;
         }
+
+        System.out.println("find dragon at " + tx + "," + ty);
 
         int mx = nx, my = ny;
         if (tx != nx) {
@@ -281,9 +271,11 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         } else {
             my += (ty - ny) / Math.abs(ty - ny);
         }
+
         Message m = new Message(1, System.currentTimeMillis(), p.getUnitID(), Message.MOVE);
         m.body.put("x", mx);
         m.body.put("y", my);
+        m.body.put("_from", "client " + p.getUnitID());
         Message resp_m = server.onMessageReceived(m);
         if ((Boolean) resp_m.body.get("move")) {
             System.out.println("Player " + p.getUnitID() + " tries to move from " + nx + "," + ny + " to " + mx + "," + my + " to attack dragon at " + tx + "," + ty + " (distance " + nd + "):" + true);
@@ -292,8 +284,6 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
         }
 
         return false;
-
-
     }
 
 
@@ -313,6 +303,8 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
                 Thread.sleep(1000);
             }
             System.out.println("Player " + p.getUnitID() + " is dead!");
+        } catch (ActionFailedException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -320,6 +312,11 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
 
     @Override
     public Message onMessageReceived(Message message) {
+        if (player == null) {
+            return null;
+        }
+        System.out.println(player.getUnitID() + " on message received");
+        System.out.println("message actor ID: " + message.actorID);
         Log.debug(message.body.toString());
         if (message.body.containsKey("isDead")) {
             alive = false;
@@ -334,6 +331,12 @@ public class ClientRunner extends UnicastRemoteObject implements IMessageReceive
                 break;
             case Message.MOVE:
                 battleField.move(message);
+                break;
+            case Message.LOGIN:
+                if (!message.actorID.equals(player.getUnitID())) {
+                    System.out.println("another player " + message.actorID + " logged in");
+                    battleField = (BattleField) message.body.get("battlefield");
+                }
                 break;
         }
         return null;
