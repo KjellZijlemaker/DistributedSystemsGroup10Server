@@ -21,20 +21,25 @@ import java.util.UUID;
 public class ServerRunner {
 
     private final static String serverID = "server-" + UUID.randomUUID ().toString ();
-    private static final int DRAGON_COUNT = 20;
+    private static final int DRAGON_COUNT = 1;
     private final MessageBroker broker = new MessageBroker();
     private ServerHandler serverHandler;
 
     ServerRunner(String args[]) throws Exception {
         int myPort = Integer.parseInt(args[0]);
-        startServer(myPort);
+        System.out.println("server bind port " + myPort);
+
 
         if (args.length == 1) {
+            System.out.println("server mode: only single server.");
+            startServer(myPort);
             return;
+        } else {
+            System.out.println("server mode: one master server with one follower server.");
+            startServer(myPort);
+            int otherServerPort = Integer.parseInt(args[1]);
+            connectToOtherServer(otherServerPort, myPort);
         }
-
-        int otherServerPort = Integer.parseInt(args[1]);
-        connectToOtherServer(otherServerPort, myPort);
     }
 
     private static TrailingStateSynchronization tss;
@@ -51,14 +56,13 @@ public class ServerRunner {
         String myRMIAddress = String.format("//localhost:%d/%s", myPort, serverID);
 
         EventList eventList = new EventList();
-        GameState localGameState = new GameState(1,eventList);
-        serverHandler = new ServerHandler(localGameState);
-        IMessageReceivedHandler clientPlayHandler = new ClientPlayHandler(serverHandler);
-        HeartbeatService heartbeatService = new HeartbeatService(localGameState);
-        new Thread(heartbeatService).start();
+        GameState localGameState = new GameState(1, eventList);
+//        serverHandler = new ServerHandler(localGameState);
+//        IMessageReceivedHandler clientPlayHandler = new ClientPlayHandler(serverHandler);
+//        HeartbeatService heartbeatService = new HeartbeatService(localGameState);
+//        new Thread(heartbeatService).start();
 
-        tss =
-                new TrailingStateSynchronization.TSSBuilder (localGameState)
+        tss = new TrailingStateSynchronization.TSSBuilder (localGameState)
                         .setDelayInterval (100)
                         .setDelays (3)
                         .setTickrate (20)
@@ -86,8 +90,8 @@ public class ServerRunner {
         broker.registerListener (Message.HEAL, tss);
         broker.registerListener (Message.MOVE, tss);
         broker.registerListener (Message.LOGIN, tss);
-        broker.registerListener (Message.HEARTBEAT, tss);
-        broker.registerListener (Message.HANDSHAKE, serverHandler);
+//        broker.registerListener (Message.HEARTBEAT, tss);
+//        broker.registerListener (Message.HANDSHAKE, serverHandler);
 //        broker.registerListener(Message.ATTACK, clientPlayHandler);
 //        broker.registerListener(Message.HEAL, clientPlayHandler);
 //        broker.registerListener(Message.MOVE, clientPlayHandler);
